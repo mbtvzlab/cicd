@@ -1,0 +1,136 @@
+@model CiCd.Models.Project
+@{
+    ViewData["Title"] = $"Project: {Model.Name}";
+}
+
+<nav class="breadcrumb">
+    <a href="@Url.Action("Index", "Project")">Projects</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">@Model.Name</span>
+</nav>
+
+<h2>@Model.Name</h2>
+
+<div class="details-grid">
+    <div class="card">
+        <div class="card-body">
+            <h3>Project Details</h3>
+            <div class="info-row">
+                <span class="info-label">ID</span>
+                <span class="info-value">#@Model.Id</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Name</span>
+                <span class="info-value">@Model.Name</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Description</span>
+                <span class="info-value">@Model.Description</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Repository</span>
+                <span class="info-value"><a href="@Model.RepositoryUrl" target="_blank">@Model.RepositoryUrl</a></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Status</span>
+                <span class="info-value">
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge badge-success"><span class="badge-dot"></span> Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-cancelled"><span class="badge-dot"></span> Inactive</span>
+                    }
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Owner</span>
+                <span class="info-value">@Model.Owner?.Username (@Model.Owner?.Email)</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Created</span>
+                <span class="info-value">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h3>Members (@Model.Members?.Count)</h3>
+            @if (Model.Members?.Any() == true)
+            {
+                <table style="margin-top: 12px;">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var member in Model.Members)
+                        {
+                            <tr>
+                                <td>@member.User?.Username</td>
+                                <td><span class="text-secondary">@member.Role</span></td>
+                                <td class="text-secondary">@member.JoinedAt.ToString("yyyy-MM-dd")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-muted" style="margin-top: 12px;">No members assigned</p>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="section" style="margin-top: 20px;">
+    <div class="card">
+        <div class="card-body">
+            <h3>Pipelines (@Model.Pipelines?.Count)</h3>
+            @if (Model.Pipelines?.Any() == true)
+            {
+                <table style="margin-top: 12px;">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Branch</th>
+                            <th>Status</th>
+                            <th>Steps</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var pipeline in Model.Pipelines)
+                        {
+                            <tr>
+                                <td><a href="@Url.Action("Details", "Pipeline", new { id = pipeline.Id })">@pipeline.Name</a></td>
+                                <td class="text-secondary">@pipeline.Branch</td>
+                                <td>
+                                    @if (pipeline.IsEnabled)
+                                    {
+                                        <span class="badge badge-success">Enabled</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-cancelled">Disabled</span>
+                                    }
+                                </td>
+                                <td>@pipeline.Steps?.Count</td>
+                                <td class="text-secondary">@pipeline.CreatedAt.ToString("yyyy-MM-dd")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-muted" style="margin-top: 12px;">No pipelines configured</p>
+            }
+        </div>
+    </div>
+</div>

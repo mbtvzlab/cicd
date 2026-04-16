@@ -13,6 +13,11 @@ public class RunLog
 
     // Build outputs, test reports, binaries, etc.
     public List<Artifact> Artifacts { get; set; } = [];
+    
+    /// <summary>
+    /// Individual step executions for this run
+    /// </summary>
+    public List<StepRun> StepRuns { get; set; } = [];
 
     public TimeSpan? Duration => FinishedAt.HasValue ? FinishedAt - StartedAt : null;
 }

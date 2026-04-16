@@ -1,0 +1,159 @@
+@model CiCd.Models.Pipeline
+@{
+    ViewData["Title"] = $"Pipeline: {Model.Name}";
+}
+
+<nav class="breadcrumb">
+    <a href="@Url.Action("Index", "Pipeline")">Pipelines</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">@Model.Name</span>
+</nav>
+
+<h2>@Model.Name</h2>
+
+<div class="details-grid">
+    <div class="card">
+        <div class="card-body">
+            <h3>Pipeline Details</h3>
+            <div class="info-row">
+                <span class="info-label">ID</span>
+                <span class="info-value">#@Model.Id</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Name</span>
+                <span class="info-value">@Model.Name</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Description</span>
+                <span class="info-value">@Model.Description</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Project</span>
+                <span class="info-value"><a href="@Url.Action("Details", "Project", new { id = Model.Project?.Id })">@Model.Project?.Name</a></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Branch</span>
+                <span class="info-value">@Model.Branch</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Status</span>
+                <span class="info-value">
+                    @if (Model.IsEnabled)
+                    {
+                        <span class="badge badge-success"><span class="badge-dot"></span> Enabled</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-cancelled"><span class="badge-dot"></span> Disabled</span>
+                    }
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Created</span>
+                <span class="info-value">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h3>Steps (@Model.Steps?.Count)</h3>
+            @if (Model.Steps?.Any() == true)
+            {
+                <table style="margin-top: 12px;">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Name</th>
+                            <th>Command</th>
+                            <th>Timeout</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var step in Model.Steps.OrderBy(s => s.Order))
+                        {
+                            <tr>
+                                <td class="text-secondary">@step.Order</td>
+                                <td>@step.Name</td>
+                                <td class="text-secondary" style="font-family: monospace;">@step.Command</td>
+                                <td>@step.TimeoutSeconds s</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-muted" style="margin-top: 12px;">No steps configured</p>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="section" style="margin-top: 20px;">
+    <div class="card">
+        <div class="card-body">
+            <h3>Recent Runs (@Model.RunLogs?.Count)</h3>
+            @if (Model.RunLogs?.Any() == true)
+            {
+                <table style="margin-top: 12px;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Status</th>
+                            <th>Trigger</th>
+                            <th>Triggered By</th>
+                            <th>Started</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var run in Model.RunLogs.OrderByDescending(r => r.StartedAt))
+                        {
+                            <tr>
+                                <td><a href="@Url.Action("Details", "RunLog", new { id = run.Id })">#@run.Id</a></td>
+                                <td>
+                                    @switch (run.Status)
+                                    {
+                                        case RunStatus.Success:
+                                            <span class="badge badge-success"><span class="badge-dot"></span> Success</span>
+                                            break;
+                                        case RunStatus.Failed:
+                                            <span class="badge badge-failed"><span class="badge-dot"></span> Failed</span>
+                                            break;
+                                        case RunStatus.Running:
+                                            <span class="badge badge-running"><span class="badge-dot"></span> Running</span>
+                                            break;
+                                        case RunStatus.Cancelled:
+                                            <span class="badge badge-cancelled"><span class="badge-dot"></span> Cancelled</span>
+                                            break;
+                                        default:
+                                            <span class="badge badge-pending">@run.Status</span>
+                                            break;
+                                    }
+                                </td>
+                                <td class="text-secondary">@run.TriggerType</td>
+                                <td>@run.TriggeredBy?.Username</td>
+                                <td class="text-secondary">@run.StartedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>
+                                    @if (run.Duration.HasValue)
+                                    {
+                                        <span>@run.Duration.Value.TotalMinutes.ToString("F1") min</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-secondary">-</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-muted" style="margin-top: 12px;">No runs yet</p>
+            }
+        </div>
+    </div>
+</div>

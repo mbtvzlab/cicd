@@ -1,0 +1,208 @@
+@model CiCd.Models.RunLog
+@{
+    ViewData["Title"] = $"Run #{Model.Id}";
+}
+
+<nav class="breadcrumb">
+    <a href="@Url.Action("Index", "RunLog")">Runs</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Run #@Model.Id</span>
+</nav>
+
+<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+    <h2 style="margin: 0;">Run #@Model.Id</h2>
+    @switch (Model.Status)
+    {
+        case RunStatus.Success:
+            <span class="badge badge-success" style="font-size: 14px; padding: 6px 12px;"><span class="badge-dot"></span> Success</span>
+            break;
+        case RunStatus.Failed:
+            <span class="badge badge-failed" style="font-size: 14px; padding: 6px 12px;"><span class="badge-dot"></span> Failed</span>
+            break;
+        case RunStatus.Running:
+            <span class="badge badge-running" style="font-size: 14px; padding: 6px 12px;"><span class="badge-dot"></span> Running</span>
+            break;
+        case RunStatus.Cancelled:
+            <span class="badge badge-cancelled" style="font-size: 14px; padding: 6px 12px;"><span class="badge-dot"></span> Cancelled</span>
+            break;
+        default:
+            <span class="badge badge-pending" style="font-size: 14px; padding: 6px 12px;">@Model.Status</span>
+            break;
+    }
+</div>
+
+<div class="details-grid">
+    <div class="card">
+        <div class="card-body">
+            <h3>Run Information</h3>
+            <div class="info-row">
+                <span class="info-label">Pipeline</span>
+                <span class="info-value"><a href="@Url.Action("Details", "Pipeline", new { id = Model.Pipeline?.Id })">@Model.Pipeline?.Name</a></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Project</span>
+                <span class="info-value">@Model.Pipeline?.Project?.Name</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Triggered By</span>
+                <span class="info-value">@Model.TriggeredBy?.Username (@Model.TriggeredBy?.Email)</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Trigger Type</span>
+                <span class="info-value">@Model.TriggerType</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Started</span>
+                <span class="info-value">@Model.StartedAt.ToString("yyyy-MM-dd HH:mm:ss")</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Finished</span>
+                <span class="info-value">
+                    @if (Model.FinishedAt.HasValue)
+                    {
+                        @Model.FinishedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")
+                    }
+                    else
+                    {
+                        <span class="text-secondary">-</span>
+                    }
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Duration</span>
+                <span class="info-value">
+                    @if (Model.Duration.HasValue)
+                    {
+                        <span style="color: var(--accent-orange);">@Model.Duration.Value.TotalMinutes.ToString("F1") minutes</span>
+                    }
+                    else
+                    {
+                        <span class="text-secondary">In progress...</span>
+                    }
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h3>Artifacts (@Model.Artifacts?.Count)</h3>
+            @if (Model.Artifacts?.Any() == true)
+            {
+                <table style="margin-top: 12px;">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Size</th>
+                            <th>Created</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var artifact in Model.Artifacts)
+                        {
+                            <tr>
+                                <td>@artifact.FileName</td>
+                                <td class="text-secondary">@(artifact.SizeBytes / 1024) KB</td>
+                                <td class="text-secondary">@artifact.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td><a href="@artifact.BlobUrl" target="_blank" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;">Download</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-muted" style="margin-top: 12px;">No artifacts produced</p>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="section" style="margin-top: 20px;">
+    <div class="card">
+        <div class="card-body">
+            <h3>Step Execution Log (@Model.StepRuns?.Count)</h3>
+            @if (Model.StepRuns?.Any() == true)
+            {
+                <div style="margin-top: 16px;">
+                    @foreach (var stepRun in Model.StepRuns.OrderBy(s => s.ExecutionOrder))
+                    {
+                        <div style="margin-bottom: 16px; border: 1px solid var(--border); border-radius: 4px; overflow: hidden;">
+                            <!-- Step Header -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border);">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-weight: 500;">@stepRun.ExecutionOrder. @stepRun.Step?.Name</span>
+                                    <span class="text-secondary" style="font-family: monospace; font-size: 11px;">@stepRun.Step?.Command</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    @switch (stepRun.Status)
+                                    {
+                                        case StepRunStatus.Success:
+                                            <span class="badge badge-success"><span class="badge-dot"></span> Success</span>
+                                            break;
+                                        case StepRunStatus.Failed:
+                                            <span class="badge badge-failed"><span class="badge-dot"></span> Failed</span>
+                                            break;
+                                        case StepRunStatus.Running:
+                                            <span class="badge badge-running"><span class="badge-dot"></span> Running</span>
+                                            break;
+                                        case StepRunStatus.Cancelled:
+                                            <span class="badge badge-cancelled"><span class="badge-dot"></span> Cancelled</span>
+                                            break;
+                                        case StepRunStatus.Skipped:
+                                            <span class="badge badge-pending">Skipped</span>
+                                            break;
+                                        default:
+                                            <span class="badge badge-pending">Pending</span>
+                                            break;
+                                    }
+                                    @if (stepRun.Duration.HasValue)
+                                    {
+                                        <span class="text-secondary" style="font-size: 11px; font-family: monospace;">@stepRun.Duration.Value.TotalSeconds.ToString("F1")s</span>
+                                    }
+                                </div>
+                            </div>
+                            
+                            <!-- Step Console Output -->
+                            @if (!string.IsNullOrEmpty(stepRun.ConsoleOutput))
+                            {
+                                <div style="background: #0d0d0d; padding: 16px; max-height: 300px; overflow: auto;">
+                                    <pre style="margin: 0; color: #d4d4d4; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-all;">@stepRun.ConsoleOutput</pre>
+                                </div>
+                            }
+                            
+                            <!-- Error Message (if failed) -->
+                            @if (!string.IsNullOrEmpty(stepRun.ErrorMessage))
+                            {
+                                <div style="background: rgba(244, 67, 54, 0.1); padding: 12px 16px; border-top: 1px solid var(--border);">
+                                    <div style="color: var(--failed); font-size: 12px; font-weight: 500; margin-bottom: 4px;">Error:</div>
+                                    <div style="color: var(--text-secondary); font-size: 12px;">@stepRun.ErrorMessage</div>
+                                </div>
+                            }
+                            
+                            <!-- Log Artifact Link -->
+                            @if (stepRun.LogArtifact != null)
+                            {
+                                <div style="padding: 8px 16px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
+                                    <a href="@stepRun.LogArtifact.BlobUrl" target="_blank" style="font-size: 11px; display: inline-flex; align-items: center; gap: 6px;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="7 10 12 15 17 10"></polyline>
+                                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                                        </svg>
+                                        Download full log (@(stepRun.LogArtifact.SizeBytes / 1024) KB)
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted" style="margin-top: 12px;">No step execution data available</p>
+            }
+        </div>
+    </div>
+</div>

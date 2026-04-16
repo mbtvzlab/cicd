@@ -1,8 +1,150 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">1,247</div>
+        <div class="stat-label">Total Runs</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value success">98</div>
+        <div class="stat-label">Passed (24h)</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value failed">12</div>
+        <div class="stat-label">Failed (24h)</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value running">5</div>
+        <div class="stat-label">Running Now</div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-header">
+        <h2>Recent Runs</h2>
+        <a href="@Url.Action("Index", "RunLog")" class="btn btn-secondary">View All</a>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Pipeline</th>
+                    <th>Project</th>
+                    <th>Trigger</th>
+                    <th>Started</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="badge badge-running"><span class="badge-dot"></span> Running</span></td>
+                    <td><a href="@Url.Action("Details", "Pipeline", new { id = 1 })">api-service-build</a></td>
+                    <td>backend-api</td>
+                    <td><span class="text-secondary">push:main</span></td>
+                    <td>2 min ago</td>
+                    <td>2m 14s</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-success"><span class="badge-dot"></span> Success</span></td>
+                    <td><a href="@Url.Action("Details", "Pipeline", new { id = 2 })">frontend-deploy</a></td>
+                    <td>web-app</td>
+                    <td><span class="text-secondary">manual</span></td>
+                    <td>15 min ago</td>
+                    <td>4m 32s</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-success"><span class="badge-dot"></span> Success</span></td>
+                    <td><a href="@Url.Action("Details", "Pipeline", new { id = 3 })">db-migration</a></td>
+                    <td>database</td>
+                    <td><span class="text-secondary">schedule</span></td>
+                    <td>32 min ago</td>
+                    <td>1m 45s</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-failed"><span class="badge-dot"></span> Failed</span></td>
+                    <td><a href="@Url.Action("Details", "Pipeline", new { id = 4 })">integration-tests</a></td>
+                    <td>backend-api</td>
+                    <td><span class="text-secondary">push:develop</span></td>
+                    <td>1 hour ago</td>
+                    <td>8m 12s</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-success"><span class="badge-dot"></span> Success</span></td>
+                    <td><a href="@Url.Action("Details", "Pipeline", new { id = 5 })">docker-build</a></td>
+                    <td>infrastructure</td>
+                    <td><span class="text-secondary">push:main</span></td>
+                    <td>2 hours ago</td>
+                    <td>12m 8s</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-cancelled"><span class="badge-dot"></span> Cancelled</span></td>
+                    <td><a href="@Url.Action("Details", "Pipeline", new { id = 6 })">load-test</a></td>
+                    <td>qa-suite</td>
+                    <td><span class="text-secondary">manual</span></td>
+                    <td>3 hours ago</td>
+                    <td>45m 22s</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-success"><span class="badge-dot"></span> Success</span></td>
+                    <td><a href="@Url.Action("Details", "Pipeline", new { id = 7 })">security-scan</a></td>
+                    <td>security</td>
+                    <td><span class="text-secondary">schedule</span></td>
+                    <td>5 hours ago</td>
+                    <td>6m 33s</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-failed"><span class="badge-dot"></span> Failed</span></td>
+                    <td><a href="@Url.Action("Details", "Pipeline", new { id = 8 })">mobile-build</a></td>
+                    <td>mobile-app</td>
+                    <td><span class="text-secondary">push:feature/login</span></td>
+                    <td>6 hours ago</td>
+                    <td>3m 19s</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-header">
+        <h2>Projects Overview</h2>
+        <a href="@Url.Action("Index", "Project")" class="btn btn-secondary">View All</a>
+    </div>
+    <div class="details-grid">
+        <div class="card">
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="info-label">Total Projects</span>
+                    <span class="info-value">24</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Active</span>
+                    <span class="info-value" style="color: var(--success);">21</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Inactive</span>
+                    <span class="info-value" style="color: var(--text-muted);">3</span>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="info-label">Total Pipelines</span>
+                    <span class="info-value">68</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Enabled</span>
+                    <span class="info-value" style="color: var(--success);">62</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Disabled</span>
+                    <span class="info-value" style="color: var(--text-muted);">6</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

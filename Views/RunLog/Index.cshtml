@@ -1,0 +1,64 @@
+@model List<CiCd.Models.RunLog>
+@{
+    ViewData["Title"] = "Runs";
+}
+
+<h2>Runs</h2>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Pipeline</th>
+                <th>Status</th>
+                <th>Triggered By</th>
+                <th>Trigger</th>
+                <th>Started</th>
+                <th>Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var run in Model.OrderByDescending(r => r.StartedAt))
+            {
+                <tr>
+                    <td><a href="@Url.Action("Details", new { id = run.Id })">#@run.Id</a></td>
+                    <td>@run.Pipeline?.Name</td>
+                    <td>
+                        @switch (run.Status)
+                        {
+                            case RunStatus.Success:
+                                <span class="badge badge-success"><span class="badge-dot"></span> Success</span>
+                                break;
+                            case RunStatus.Failed:
+                                <span class="badge badge-failed"><span class="badge-dot"></span> Failed</span>
+                                break;
+                            case RunStatus.Running:
+                                <span class="badge badge-running"><span class="badge-dot"></span> Running</span>
+                                break;
+                            case RunStatus.Cancelled:
+                                <span class="badge badge-cancelled"><span class="badge-dot"></span> Cancelled</span>
+                                break;
+                            default:
+                                <span class="badge badge-pending">@run.Status</span>
+                                break;
+                        }
+                    </td>
+                    <td>@run.TriggeredBy?.Username</td>
+                    <td class="text-secondary">@run.TriggerType</td>
+                    <td class="text-secondary">@run.StartedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>
+                        @if (run.Duration.HasValue)
+                        {
+                            <span>@run.Duration.Value.TotalMinutes.ToString("F1") min</span>
+                        }
+                        else
+                        {
+                            <span class="text-secondary">-</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

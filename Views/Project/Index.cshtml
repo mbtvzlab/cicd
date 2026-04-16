@@ -1,0 +1,45 @@
+@model List<CiCd.Models.Project>
+@{
+    ViewData["Title"] = "Projects";
+}
+
+<h2>Projects</h2>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Owner</th>
+                <th>Members</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in Model)
+            {
+                <tr>
+                    <td>#@project.Id</td>
+                    <td><a href="@Url.Action("Details", new { id = project.Id })">@project.Name</a></td>
+                    <td><span class="text-secondary">@project.Description</span></td>
+                    <td>
+                        @if (project.IsActive)
+                        {
+                            <span class="badge badge-success"><span class="badge-dot"></span> Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-cancelled"><span class="badge-dot"></span> Inactive</span>
+                        }
+                    </td>
+                    <td>@project.Owner?.Username</td>
+                    <td>@project.Members?.Count</td>
+                    <td class="text-secondary">@project.CreatedAt.ToString("yyyy-MM-dd")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

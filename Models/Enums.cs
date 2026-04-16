@@ -30,3 +30,13 @@ public enum TriggerType
     Schedule,
     PullRequest
 }
+
+public enum StepRunStatus
+{
+    Pending,
+    Running,
+    Success,
+    Failed,
+    Cancelled,
+    Skipped
+}

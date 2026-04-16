@@ -1,0 +1,45 @@
+@model List<CiCd.Models.Pipeline>
+@{
+    ViewData["Title"] = "Pipelines";
+}
+
+<h2>Pipelines</h2>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Project</th>
+                <th>Branch</th>
+                <th>Status</th>
+                <th>Steps</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var pipeline in Model)
+            {
+                <tr>
+                    <td>#@pipeline.Id</td>
+                    <td><a href="@Url.Action("Details", new { id = pipeline.Id })">@pipeline.Name</a></td>
+                    <td>@pipeline.Project?.Name</td>
+                    <td class="text-secondary">@pipeline.Branch</td>
+                    <td>
+                        @if (pipeline.IsEnabled)
+                        {
+                            <span class="badge badge-success"><span class="badge-dot"></span> Enabled</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-cancelled"><span class="badge-dot"></span> Disabled</span>
+                        }
+                    </td>
+                    <td>@pipeline.Steps?.Count</td>
+                    <td class="text-secondary">@pipeline.CreatedAt.ToString("yyyy-MM-dd")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

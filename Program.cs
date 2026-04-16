@@ -1,4 +1,5 @@
 using CiCd.Models;
+using CiCd.Data;
 
 // Seed users
 var alice = new User
@@ -328,6 +329,11 @@ foreach (var item in latestSuccess)
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
+
+// Register mock repositories for dependency injection
+builder.Services.AddSingleton<ProjectMockRepository>();
+builder.Services.AddSingleton<PipelineMockRepository>();
+builder.Services.AddSingleton<RunLogMockRepository>();
 
 var app = builder.Build();
 

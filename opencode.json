@@ -1,0 +1,44 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "build": {
+      "mode": "primary",
+      "model": "nano-gpt/moonshotai/kimi-k2.5:thinking",
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "plan": {
+      "mode": "primary",
+      "model": "nano-gpt/moonshotai/kimi-k2.5:thinking",
+      "tools": {
+        "write": false,
+        "edit": false,
+        "bash": false
+      }
+    },
+    "code-reviewer": {
+      "description": "Reviews code for best practices and potential issues",
+      "mode": "subagent",
+      "model": "nano-gpt/moonshotai/kimi-k2.5",
+      "prompt": "You are a code reviewer. Focus on security, performance, and maintainability.",
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    },
+    "ui": {
+      "description": "Writes frontend code, designs UI/UX",
+      "mode": "subagent",
+      "model": "nano-gpt/moonshotai/kimi-k2.5:thinking",
+      "prompt": "{file:./prompts/ui}",
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": false
+      }
+    }
+  }
+}
