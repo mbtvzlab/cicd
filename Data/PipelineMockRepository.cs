@@ -154,4 +154,9 @@ public class PipelineMockRepository : IPipelineRepository
     {
         _pipelines.RemoveAll(p => p.Id == id);
     }
+
+    public List<Pipeline> Search(string query)
+    {
+        return _pipelines.Where(p => p.Name.Contains(query, StringComparison.OrdinalIgnoreCase) || p.Branch.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
 }

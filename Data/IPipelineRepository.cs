@@ -10,4 +10,5 @@ public interface IPipelineRepository
     Pipeline Add(Pipeline pipeline);
     void Update(Pipeline pipeline);
     void Delete(int id);
+    List<Pipeline> Search(string query);
 }

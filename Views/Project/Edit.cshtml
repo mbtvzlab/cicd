@@ -1,0 +1,60 @@
+@model CiCd.ViewModels.ProjectEditModel
+@using CiCd.Models
+@{
+    ViewData["Title"] = "Edit Project";
+    var users = ViewBag.Users as List<User> ?? new List<User>();
+    var currentOwner = users.FirstOrDefault(u => u.Id == Model.OwnerId);
+    var currentOwnerDisplay = currentOwner != null ? $"{currentOwner.Username} ({currentOwner.Email})" : "";
+}
+
+<div class="breadcrumb">
+    <a href="@Url.Action("Index", "Home")">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="@Url.Action("Index", "Project")">Projects</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Edit @Model.Name</span>
+</div>
+
+<h2>Edit Project &mdash; @Model.Name</h2>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="Name"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="validation-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="validation-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RepositoryUrl"></label>
+                <input asp-for="RepositoryUrl" class="form-control" />
+                <span asp-validation-for="RepositoryUrl" class="validation-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="OwnerId">Owner</label>
+                <div class="autocomplete-wrapper" data-search-url="/api/users/search" data-hidden-id="OwnerId">
+                    <input type="text" id="owner-autocomplete" class="autocomplete-input" placeholder="Type to search for a user..." value="@currentOwnerDisplay" autocomplete="off" />
+                    <input type="hidden" id="OwnerId" name="OwnerId" value="@Model.OwnerId" />
+                    <div class="autocomplete-dropdown" id="owner-autocomplete-dropdown"></div>
+                </div>
+                <span asp-validation-for="OwnerId" class="validation-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="IsActive">
+                    <input asp-for="IsActive" type="checkbox" /> Active
+                </label>
+            </div>
+            <div style="margin-top: 16px; display: flex; gap: 8px;">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="@Url.Action("Index", "Project")" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

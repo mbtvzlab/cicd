@@ -1,0 +1,88 @@
+using CiCd.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace CiCd.Data;
+
+public class EfPipelineRepository : IPipelineRepository
+{
+    private readonly CiCdDbContext _context;
+
+    public EfPipelineRepository(CiCdDbContext context)
+    {
+        _context = context;
+    }
+
+    public List<Pipeline> GetAll()
+    {
+        return _context.Pipelines
+            .Include(p => p.Project)
+                .ThenInclude(pr => pr.Owner)
+            .Include(p => p.Steps)
+                .ThenInclude(s => s.LogArtifact)
+            .Include(p => p.RunLogs)
+                .ThenInclude(r => r.TriggeredBy)
+            .Include(p => p.RunLogs)
+                .ThenInclude(r => r.Artifacts)
+            .Where(p => p.DeletedAt == null)
+            .ToList();
+    }
+
+    public Pipeline? GetById(int id)
+    {
+        return _context.Pipelines
+            .Include(p => p.Project)
+                .ThenInclude(pr => pr.Owner)
+            .Include(p => p.Steps)
+                .ThenInclude(s => s.LogArtifact)
+            .Include(p => p.RunLogs)
+                .ThenInclude(r => r.TriggeredBy)
+            .Include(p => p.RunLogs)
+                .ThenInclude(r => r.Artifacts)
+            .FirstOrDefault(p => p.Id == id && p.DeletedAt == null);
+    }
+
+    public List<Pipeline> GetByProjectId(int projectId)
+    {
+        return _context.Pipelines
+            .Include(p => p.Project)
+            .Include(p => p.Steps)
+            .Include(p => p.RunLogs)
+                .ThenInclude(r => r.TriggeredBy)
+            .Where(p => p.ProjectId == projectId)
+            .ToList();
+    }
+
+    public Pipeline Add(Pipeline pipeline)
+    {
+        _context.Pipelines.Add(pipeline);
+        _context.SaveChanges();
+        return pipeline;
+    }
+
+    public void Update(Pipeline pipeline)
+    {
+        _context.Pipelines.Update(pipeline);
+        _context.SaveChanges();
+    }
+
+    public void Delete(int id)
+    {
+        var pipeline = _context.Pipelines.Find(id);
+        if (pipeline != null)
+        {
+            pipeline.DeletedAt = DateTime.UtcNow;
+            _context.SaveChanges();
+        }
+    }
+
+    public List<Pipeline> Search(string query)
+    {
+        return _context.Pipelines
+            .Include(p => p.Project)
+                .ThenInclude(pr => pr.Owner)
+            .Include(p => p.Steps)
+            .Where(p => p.DeletedAt == null &&
+                (p.Name.Contains(query) || p.Branch.Contains(query)))
+            .ToList();
+    }
+}

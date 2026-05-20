@@ -1,0 +1,13 @@
+@{
+    var inputId = ViewData["InputId"] as string ?? "autocomplete-input";
+    var hiddenId = ViewData["HiddenId"] as string ?? "autocomplete-value";
+    var searchUrl = ViewData["SearchUrl"] as string ?? "";
+    var placeholder = ViewData["Placeholder"] as string ?? "Type to search...";
+    var initialValue = ViewData["InitialValue"] as string ?? "";
+}
+
+<div class="autocomplete-wrapper" data-search-url="@searchUrl" data-hidden-id="@hiddenId">
+    <input type="text" id="@inputId" class="autocomplete-input" placeholder="@placeholder" value="@initialValue" autocomplete="off" />
+    <input type="hidden" id="@hiddenId" name="@hiddenId" value="@ViewData["SelectedValue"]" />
+    <div class="autocomplete-dropdown" id="@(inputId)-dropdown"></div>
+</div>

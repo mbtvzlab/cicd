@@ -90,4 +90,9 @@ public class RunLogMockRepository : IRunLogRepository
     {
         _runLogs.RemoveAll(r => r.Id == id);
     }
+
+    public List<RunLog> Search(string query)
+    {
+        return _runLogs.Where(r => r.Pipeline.Name.Contains(query, StringComparison.OrdinalIgnoreCase) || r.TriggeredBy.Username.Contains(query, StringComparison.OrdinalIgnoreCase) || r.Status.ToString().Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
 }

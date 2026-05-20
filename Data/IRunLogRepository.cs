@@ -10,4 +10,5 @@ public interface IRunLogRepository
     RunLog Add(RunLog runLog);
     void Update(RunLog runLog);
     void Delete(int id);
+    List<RunLog> Search(string query);
 }

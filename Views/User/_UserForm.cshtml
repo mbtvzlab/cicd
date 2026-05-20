@@ -1,0 +1,25 @@
+@model User
+
+<div class="info-row">
+    <label asp-for="Username" class="info-label"></label>
+    <div class="info-value">
+        <input asp-for="Username" class="form-control" style="width:100%;padding:6px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:12px;" />
+        <span asp-validation-for="Username" style="color:var(--failed);font-size:11px;"></span>
+    </div>
+</div>
+
+<div class="info-row">
+    <label asp-for="Email" class="info-label"></label>
+    <div class="info-value">
+        <input asp-for="Email" class="form-control" style="width:100%;padding:6px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:12px;" />
+        <span asp-validation-for="Email" style="color:var(--failed);font-size:11px;"></span>
+    </div>
+</div>
+
+<div class="info-row">
+    <label asp-for="Role" class="info-label"></label>
+    <div class="info-value">
+        <select asp-for="Role" asp-items="Html.GetEnumSelectList<UserRole>()" style="padding:6px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:12px;"></select>
+        <span asp-validation-for="Role" style="color:var(--failed);font-size:11px;"></span>
+    </div>
+</div>

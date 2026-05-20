@@ -16,6 +16,7 @@
         in
         {
           default = pkgs.mkShell {
+            DOTNET_ROOT = "${pkgs.dotnet-sdk_10}/share/dotnet";
             buildInputs = with pkgs; [
               dotnet-sdk_10
               omnisharp-roslyn

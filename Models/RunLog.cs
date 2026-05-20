@@ -1,23 +1,30 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace CiCd.Models;
 
 public class RunLog
 {
+    [Key]
     public int Id { get; set; }
     public DateTime StartedAt { get; set; }
     public DateTime? FinishedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
     public RunStatus Status { get; set; }
     public TriggerType TriggerType { get; set; }
 
-    public Pipeline Pipeline { get; set; } = null!;
-    public User TriggeredBy { get; set; } = null!;
+    [ForeignKey("Pipeline")]
+    public int PipelineId { get; set; }
+    public virtual Pipeline Pipeline { get; set; } = null!;
 
-    // Build outputs, test reports, binaries, etc.
-    public List<Artifact> Artifacts { get; set; } = [];
-    
-    /// <summary>
-    /// Individual step executions for this run
-    /// </summary>
-    public List<StepRun> StepRuns { get; set; } = [];
+    [ForeignKey("TriggeredBy")]
+    public int TriggeredByUserId { get; set; }
+    public virtual User TriggeredBy { get; set; } = null!;
 
+    public virtual ICollection<Artifact> Artifacts { get; set; } = new List<Artifact>();
+
+    public virtual ICollection<StepRun> StepRuns { get; set; } = new List<StepRun>();
+
+    [NotMapped]
     public TimeSpan? Duration => FinishedAt.HasValue ? FinishedAt - StartedAt : null;
 }

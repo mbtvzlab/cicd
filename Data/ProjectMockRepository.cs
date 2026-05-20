@@ -87,4 +87,9 @@ public class ProjectMockRepository : IProjectRepository
     {
         _projects.RemoveAll(p => p.Id == id);
     }
+
+    public List<Project> Search(string query)
+    {
+        return _projects.Where(p => p.Name.Contains(query, StringComparison.OrdinalIgnoreCase) || p.Description.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
 }

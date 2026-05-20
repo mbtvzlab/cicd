@@ -1,16 +1,29 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace CiCd.Models;
 
 public class PipelineStep
 {
+    [Key]
     public int Id { get; set; }
+
+    [Required]
+    [MaxLength(200)]
     public string Name { get; set; } = "";
+
+    [Required]
     public string Command { get; set; } = "";
+
     public int Order { get; set; }
     public int TimeoutSeconds { get; set; }
     public bool ContinueOnError { get; set; }
 
-    public Pipeline Pipeline { get; set; } = null!;
+    [ForeignKey("Pipeline")]
+    public int PipelineId { get; set; }
+    public virtual Pipeline Pipeline { get; set; } = null!;
 
-    // Log output (stdout/stderr) produced when this step runs
-    public Artifact? LogArtifact { get; set; }
+    [ForeignKey("LogArtifact")]
+    public int? LogArtifactId { get; set; }
+    public virtual Artifact? LogArtifact { get; set; }
 }

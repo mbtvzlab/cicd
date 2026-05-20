@@ -1,0 +1,28 @@
+@model User
+@using CiCd.Models
+@{
+    ViewData["Title"] = "Create User";
+}
+
+<div class="breadcrumb">
+    <a href="@Url.Action("Index", "Home")">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="@Url.Action("Index", "User")">Users</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">New User</span>
+</div>
+
+<h2>New User</h2>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            @await Html.PartialAsync("_UserForm", Model)
+            <div style="margin-top: 16px; display: flex; gap: 8px;">
+                <button type="submit" class="btn btn-primary">Create</button>
+                <a href="@Url.Action("Index", "User")" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

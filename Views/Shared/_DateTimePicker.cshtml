@@ -1,0 +1,7 @@
+@{
+    var inputId = ViewData["InputId"] as string ?? "datetime-input";
+    var inputName = ViewData["InputName"] as string ?? inputId;
+    var initialValue = ViewData["InitialValue"] as string ?? "";
+}
+
+<input type="text" id="@inputId" name="@inputName" class="form-control datetime-picker" value="@initialValue" autocomplete="off" />

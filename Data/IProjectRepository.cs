@@ -9,4 +9,5 @@ public interface IProjectRepository
     Project Add(Project project);
     void Update(Project project);
     void Delete(int id);
+    List<Project> Search(string query);
 }
