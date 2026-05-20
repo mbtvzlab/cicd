@@ -12,9 +12,13 @@ public class RunLogMockRepository : IRunLogRepository
         var bob = new User { Id = 2, Username = "bob", Email = "bob@example.com", PasswordHash = "hash2", CreatedAt = new DateTime(2024, 2, 14), Role = UserRole.Developer };
         var carol = new User { Id = 3, Username = "carol", Email = "carol@example.com", PasswordHash = "hash3", CreatedAt = new DateTime(2024, 3, 5), Role = UserRole.Developer };
 
-        var pipelineCi = new Pipeline { Id = 1, Name = "CI Pipeline" };
-        var pipelineFeCI = new Pipeline { Id = 2, Name = "Frontend CI" };
-        var pipelineTf = new Pipeline { Id = 3, Name = "Terraform Apply" };
+        var projectApi = new Project { Id = 1, Name = "REST API", IsActive = true };
+        var projectFe = new Project { Id = 2, Name = "Frontend", IsActive = true };
+        var projectInfra = new Project { Id = 3, Name = "Infrastructure", IsActive = false };
+
+        var pipelineCi = new Pipeline { Id = 1, Name = "CI Pipeline", Branch = "main", IsEnabled = true, Project = projectApi };
+        var pipelineFeCI = new Pipeline { Id = 2, Name = "Frontend CI", Branch = "main", IsEnabled = true, Project = projectFe };
+        var pipelineTf = new Pipeline { Id = 3, Name = "Terraform Apply", Branch = "main", IsEnabled = false, Project = projectInfra };
 
         _runLogs =
         [

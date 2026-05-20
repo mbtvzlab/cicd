@@ -6,9 +6,9 @@ namespace CiCd.Controllers;
 
 public class ProjectController : Controller
 {
-    private readonly ProjectMockRepository _projectRepository;
+    private readonly IProjectRepository _projectRepository;
 
-    public ProjectController(ProjectMockRepository projectRepository)
+    public ProjectController(IProjectRepository projectRepository)
     {
         _projectRepository = projectRepository;
     }

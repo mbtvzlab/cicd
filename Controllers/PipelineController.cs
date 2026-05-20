@@ -6,9 +6,9 @@ namespace CiCd.Controllers;
 
 public class PipelineController : Controller
 {
-    private readonly PipelineMockRepository _pipelineRepository;
+    private readonly IPipelineRepository _pipelineRepository;
 
-    public PipelineController(PipelineMockRepository pipelineRepository)
+    public PipelineController(IPipelineRepository pipelineRepository)
     {
         _pipelineRepository = pipelineRepository;
     }

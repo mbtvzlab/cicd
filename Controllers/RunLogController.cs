@@ -6,9 +6,9 @@ namespace CiCd.Controllers;
 
 public class RunLogController : Controller
 {
-    private readonly RunLogMockRepository _runLogRepository;
+    private readonly IRunLogRepository _runLogRepository;
 
-    public RunLogController(RunLogMockRepository runLogRepository)
+    public RunLogController(IRunLogRepository runLogRepository)
     {
         _runLogRepository = runLogRepository;
     }

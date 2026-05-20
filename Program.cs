@@ -330,10 +330,10 @@ foreach (var item in latestSuccess)
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
-// Register mock repositories for dependency injection
-builder.Services.AddSingleton<ProjectMockRepository>();
-builder.Services.AddSingleton<PipelineMockRepository>();
-builder.Services.AddSingleton<RunLogMockRepository>();
+// Register repositories for dependency injection
+builder.Services.AddSingleton<IProjectRepository, ProjectMockRepository>();
+builder.Services.AddSingleton<IPipelineRepository, PipelineMockRepository>();
+builder.Services.AddSingleton<IRunLogRepository, RunLogMockRepository>();
 
 var app = builder.Build();
 
