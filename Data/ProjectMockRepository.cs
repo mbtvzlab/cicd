@@ -2,7 +2,7 @@ using CiCd.Models;
 
 namespace CiCd.Data;
 
-public class ProjectMockRepository
+public class ProjectMockRepository : IProjectRepository
 {
     private readonly List<Project> _projects;
 
@@ -69,4 +69,22 @@ public class ProjectMockRepository
     public List<Project> GetAll() => _projects;
 
     public Project? GetById(int id) => _projects.FirstOrDefault(p => p.Id == id);
+
+    public Project Add(Project project)
+    {
+        project.Id = _projects.Count > 0 ? _projects.Max(p => p.Id) + 1 : 1;
+        _projects.Add(project);
+        return project;
+    }
+
+    public void Update(Project project)
+    {
+        var index = _projects.FindIndex(p => p.Id == project.Id);
+        if (index >= 0) _projects[index] = project;
+    }
+
+    public void Delete(int id)
+    {
+        _projects.RemoveAll(p => p.Id == id);
+    }
 }

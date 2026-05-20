@@ -2,7 +2,7 @@ using CiCd.Models;
 
 namespace CiCd.Data;
 
-public class PipelineMockRepository
+public class PipelineMockRepository : IPipelineRepository
 {
     private readonly List<Pipeline> _pipelines;
 
@@ -134,4 +134,24 @@ public class PipelineMockRepository
     public List<Pipeline> GetAll() => _pipelines;
 
     public Pipeline? GetById(int id) => _pipelines.FirstOrDefault(p => p.Id == id);
+
+    public List<Pipeline> GetByProjectId(int projectId) => _pipelines.Where(p => p.Project.Id == projectId).ToList();
+
+    public Pipeline Add(Pipeline pipeline)
+    {
+        pipeline.Id = _pipelines.Count > 0 ? _pipelines.Max(p => p.Id) + 1 : 1;
+        _pipelines.Add(pipeline);
+        return pipeline;
+    }
+
+    public void Update(Pipeline pipeline)
+    {
+        var index = _pipelines.FindIndex(p => p.Id == pipeline.Id);
+        if (index >= 0) _pipelines[index] = pipeline;
+    }
+
+    public void Delete(int id)
+    {
+        _pipelines.RemoveAll(p => p.Id == id);
+    }
 }

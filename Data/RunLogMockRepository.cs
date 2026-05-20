@@ -2,7 +2,7 @@ using CiCd.Models;
 
 namespace CiCd.Data;
 
-public class RunLogMockRepository
+public class RunLogMockRepository : IRunLogRepository
 {
     private readonly List<RunLog> _runLogs;
 
@@ -66,4 +66,24 @@ public class RunLogMockRepository
     public List<RunLog> GetAll() => _runLogs;
 
     public RunLog? GetById(int id) => _runLogs.FirstOrDefault(r => r.Id == id);
+
+    public List<RunLog> GetByPipelineId(int pipelineId) => _runLogs.Where(r => r.Pipeline.Id == pipelineId).ToList();
+
+    public RunLog Add(RunLog runLog)
+    {
+        runLog.Id = _runLogs.Count > 0 ? _runLogs.Max(r => r.Id) + 1 : 1;
+        _runLogs.Add(runLog);
+        return runLog;
+    }
+
+    public void Update(RunLog runLog)
+    {
+        var index = _runLogs.FindIndex(r => r.Id == runLog.Id);
+        if (index >= 0) _runLogs[index] = runLog;
+    }
+
+    public void Delete(int id)
+    {
+        _runLogs.RemoveAll(r => r.Id == id);
+    }
 }
