@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CiCd.Data;
 using CiCd.Models;
@@ -5,6 +6,7 @@ using CiCd.Models;
 namespace CiCd.Controllers;
 
 [Route("users")]
+[Authorize(Roles = "Admin")]
 public class UserController : Controller
 {
     private readonly IUserRepository _userRepository;
@@ -41,7 +43,9 @@ public class UserController : Controller
     {
         if (!ModelState.IsValid) return View(user);
         user.CreatedAt = DateTime.UtcNow;
-        user.PasswordHash = Guid.NewGuid().ToString();
+        user.PasswordHash = string.IsNullOrEmpty(user.Password)
+            ? BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString())
+            : BCrypt.Net.BCrypt.HashPassword(user.Password);
         _userRepository.Add(user);
         return RedirectToAction(nameof(Index));
     }
@@ -65,6 +69,10 @@ public class UserController : Controller
         existing.Username = user.Username;
         existing.Email = user.Email;
         existing.Role = user.Role;
+        if (!string.IsNullOrEmpty(user.Password))
+        {
+            existing.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
+        }
         _userRepository.Update(existing);
         return RedirectToAction(nameof(Index));
     }

@@ -22,8 +22,4 @@ public class PipelineStep
     [ForeignKey("Pipeline")]
     public int PipelineId { get; set; }
     public virtual Pipeline Pipeline { get; set; } = null!;
-
-    [ForeignKey("LogArtifact")]
-    public int? LogArtifactId { get; set; }
-    public virtual Artifact? LogArtifact { get; set; }
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CiCd.Data;
 using CiCd.Models;
@@ -6,6 +7,7 @@ using CiCd.ViewModels;
 namespace CiCd.Controllers;
 
 [Route("runs")]
+[Authorize(Roles = "Admin,Developer,Viewer")]
 public class RunLogController : Controller
 {
     private readonly IRunLogRepository _runLogRepository;
@@ -66,6 +68,7 @@ public class RunLogController : Controller
 
     [HttpPost("{id:int}/edit")]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Developer")]
     public IActionResult Edit(int id, RunLogEditModel model)
     {
         if (id != model.Id) return BadRequest();
@@ -89,6 +92,7 @@ public class RunLogController : Controller
 
     [HttpPost("{id:int}/delete")]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public IActionResult Delete(int id)
     {
         _runLogRepository.Delete(id);
@@ -97,6 +101,7 @@ public class RunLogController : Controller
 
     [HttpPost("{id:int}/retrigger")]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Developer")]
     public IActionResult Retrigger(int id)
     {
         var runLog = _runLogRepository.GetById(id);

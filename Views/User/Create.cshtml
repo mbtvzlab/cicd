@@ -18,7 +18,7 @@
     <div class="card-body">
         <form asp-action="Create" method="post">
             @Html.AntiForgeryToken()
-            @await Html.PartialAsync("_UserForm", Model)
+            @await Html.PartialAsync("_UserCreateForm", Model)
             <div style="margin-top: 16px; display: flex; gap: 8px;">
                 <button type="submit" class="btn btn-primary">Create</button>
                 <a href="@Url.Action("Index", "User")" class="btn btn-secondary">Cancel</a>

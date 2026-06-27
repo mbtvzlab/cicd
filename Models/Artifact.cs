@@ -19,6 +19,6 @@ public class Artifact
     public DateTime CreatedAt { get; set; }
 
     [ForeignKey("RunLog")]
-    public int? RunLogId { get; set; }
-    public virtual RunLog? RunLog { get; set; }
+    public int RunLogId { get; set; }
+    public virtual RunLog RunLog { get; set; } = null!;
 }

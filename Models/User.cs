@@ -12,12 +12,20 @@ public class User
     [MaxLength(100)]
     public string Username { get; set; } = "";
 
+    [MaxLength(200)]
+    public string? DisplayName { get; set; }
+
     [Required]
     [MaxLength(200)]
     public string Email { get; set; } = "";
 
     [Required]
     public string PasswordHash { get; set; } = "";
+
+    [NotMapped]
+    [DataType(DataType.Password)]
+    [MinLength(6, ErrorMessage = "Password must be at least 6 characters long.")]
+    public string? Password { get; set; }
 
     public DateTime CreatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }

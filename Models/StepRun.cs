@@ -22,7 +22,7 @@ public class StepRun
     public StepRunStatus Status { get; set; }
     public int? ExitCode { get; set; }
 
-    public string ConsoleOutput { get; set; } = "";
+    public string LogOutput { get; set; } = "";
 
     [NotMapped]
     public TimeSpan? Duration => StartedAt.HasValue && FinishedAt.HasValue
@@ -30,8 +30,4 @@ public class StepRun
         : (StartedAt.HasValue ? DateTime.UtcNow - StartedAt.Value : null);
 
     public string? ErrorMessage { get; set; }
-
-    [ForeignKey("LogArtifact")]
-    public int? LogArtifactId { get; set; }
-    public virtual Artifact? LogArtifact { get; set; }
 }

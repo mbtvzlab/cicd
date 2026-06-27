@@ -25,6 +25,8 @@ public class RunLog
 
     public virtual ICollection<StepRun> StepRuns { get; set; } = new List<StepRun>();
 
+    public string LogOutput { get; set; } = "";
+
     [NotMapped]
     public TimeSpan? Duration => FinishedAt.HasValue ? FinishedAt - StartedAt : null;
 }

@@ -1,0 +1,84 @@
+@model CiCd.ViewModels.SettingsViewModel
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<div class="breadcrumb">
+    <a href="@Url.Action("Index", "Home")">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Settings</span>
+</div>
+
+<h2>Account Settings</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="toast-success" style="margin-bottom: 16px; padding: 10px 16px; border-radius: 4px;">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Index" asp-controller="Settings" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="info-row">
+                <label asp-for="Username" class="info-label"></label>
+                <div class="info-value">
+                    <input asp-for="Username" class="form-control" style="width:100%;padding:6px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:12px;" disabled />
+                    <input type="hidden" asp-for="Username" />
+                </div>
+            </div>
+
+            <div class="info-row">
+                <label asp-for="DisplayName" class="info-label"></label>
+                <div class="info-value">
+                    <input asp-for="DisplayName" class="form-control" style="width:100%;padding:6px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:12px;" />
+                    <span asp-validation-for="DisplayName" style="color:var(--failed);font-size:11px;"></span>
+                </div>
+            </div>
+
+            <div class="info-row">
+                <label asp-for="Email" class="info-label"></label>
+                <div class="info-value">
+                    <input asp-for="Email" class="form-control" style="width:100%;padding:6px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:12px;" />
+                    <span asp-validation-for="Email" style="color:var(--failed);font-size:11px;"></span>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 24px;">Change Password</h3>
+            <p class="text-secondary" style="font-size: 12px; margin-bottom: 16px;">Leave the password fields blank to keep your current password.</p>
+
+            <div class="info-row">
+                <label asp-for="CurrentPassword" class="info-label"></label>
+                <div class="info-value">
+                    <input asp-for="CurrentPassword" type="password" class="form-control" style="width:100%;padding:6px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:12px;" />
+                    <span asp-validation-for="CurrentPassword" style="color:var(--failed);font-size:11px;"></span>
+                </div>
+            </div>
+
+            <div class="info-row">
+                <label asp-for="NewPassword" class="info-label"></label>
+                <div class="info-value">
+                    <input asp-for="NewPassword" type="password" class="form-control" style="width:100%;padding:6px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:12px;" />
+                    <span asp-validation-for="NewPassword" style="color:var(--failed);font-size:11px;"></span>
+                </div>
+            </div>
+
+            <div class="info-row">
+                <label asp-for="ConfirmPassword" class="info-label"></label>
+                <div class="info-value">
+                    <input asp-for="ConfirmPassword" type="password" class="form-control" style="width:100%;padding:6px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:12px;" />
+                    <span asp-validation-for="ConfirmPassword" style="color:var(--failed);font-size:11px;"></span>
+                </div>
+            </div>
+
+            <div style="margin-top: 16px; display: flex; gap: 8px;">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

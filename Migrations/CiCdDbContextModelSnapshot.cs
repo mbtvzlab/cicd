@@ -42,7 +42,7 @@ namespace CiCd.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<int?>("RunLogId")
+                    b.Property<int>("RunLogId")
                         .HasColumnType("integer");
 
                     b.Property<long>("SizeBytes")
@@ -55,70 +55,6 @@ namespace CiCd.Migrations
                     b.ToTable("Artifacts");
 
                     b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            BlobUrl = "https://s3.example.com/logs/1/build.log",
-                            CreatedAt = new DateTime(2024, 5, 1, 10, 5, 0, 0, DateTimeKind.Utc),
-                            FileName = "build.log",
-                            SizeBytes = 4096L
-                        },
-                        new
-                        {
-                            Id = 2,
-                            BlobUrl = "https://s3.example.com/logs/1/test.log",
-                            CreatedAt = new DateTime(2024, 5, 1, 10, 6, 0, 0, DateTimeKind.Utc),
-                            FileName = "test.log",
-                            SizeBytes = 8192L
-                        },
-                        new
-                        {
-                            Id = 3,
-                            BlobUrl = "https://s3.example.com/logs/1/deploy.log",
-                            CreatedAt = new DateTime(2024, 5, 1, 10, 7, 0, 0, DateTimeKind.Utc),
-                            FileName = "deploy.log",
-                            SizeBytes = 1024L
-                        },
-                        new
-                        {
-                            Id = 4,
-                            BlobUrl = "https://s3.example.com/logs/2/lint.log",
-                            CreatedAt = new DateTime(2024, 5, 3, 14, 1, 0, 0, DateTimeKind.Utc),
-                            FileName = "lint.log",
-                            SizeBytes = 2048L
-                        },
-                        new
-                        {
-                            Id = 5,
-                            BlobUrl = "https://s3.example.com/logs/2/build.log",
-                            CreatedAt = new DateTime(2024, 5, 3, 14, 3, 0, 0, DateTimeKind.Utc),
-                            FileName = "build.log",
-                            SizeBytes = 6144L
-                        },
-                        new
-                        {
-                            Id = 6,
-                            BlobUrl = "https://s3.example.com/logs/3/validate.log",
-                            CreatedAt = new DateTime(2024, 4, 10, 8, 1, 0, 0, DateTimeKind.Utc),
-                            FileName = "validate.log",
-                            SizeBytes = 512L
-                        },
-                        new
-                        {
-                            Id = 7,
-                            BlobUrl = "https://s3.example.com/logs/3/plan.log",
-                            CreatedAt = new DateTime(2024, 4, 10, 8, 3, 0, 0, DateTimeKind.Utc),
-                            FileName = "plan.log",
-                            SizeBytes = 3072L
-                        },
-                        new
-                        {
-                            Id = 8,
-                            BlobUrl = "https://s3.example.com/logs/3/apply.log",
-                            CreatedAt = new DateTime(2024, 4, 10, 8, 6, 0, 0, DateTimeKind.Utc),
-                            FileName = "apply.log",
-                            SizeBytes = 2048L
-                        },
                         new
                         {
                             Id = 10,
@@ -227,9 +163,6 @@ namespace CiCd.Migrations
                     b.Property<bool>("ContinueOnError")
                         .HasColumnType("boolean");
 
-                    b.Property<int?>("LogArtifactId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -246,9 +179,6 @@ namespace CiCd.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LogArtifactId")
-                        .IsUnique();
-
                     b.HasIndex("PipelineId");
 
                     b.ToTable("PipelineSteps");
@@ -259,7 +189,6 @@ namespace CiCd.Migrations
                             Id = 1,
                             Command = "dotnet build",
                             ContinueOnError = false,
-                            LogArtifactId = 1,
                             Name = "Build",
                             Order = 1,
                             PipelineId = 1,
@@ -270,7 +199,6 @@ namespace CiCd.Migrations
                             Id = 2,
                             Command = "dotnet test",
                             ContinueOnError = false,
-                            LogArtifactId = 2,
                             Name = "Test",
                             Order = 2,
                             PipelineId = 1,
@@ -281,7 +209,6 @@ namespace CiCd.Migrations
                             Id = 3,
                             Command = "./deploy.sh",
                             ContinueOnError = false,
-                            LogArtifactId = 3,
                             Name = "Deploy",
                             Order = 3,
                             PipelineId = 1,
@@ -292,7 +219,6 @@ namespace CiCd.Migrations
                             Id = 4,
                             Command = "npm run lint",
                             ContinueOnError = false,
-                            LogArtifactId = 4,
                             Name = "Lint",
                             Order = 1,
                             PipelineId = 2,
@@ -303,7 +229,6 @@ namespace CiCd.Migrations
                             Id = 5,
                             Command = "npm run build",
                             ContinueOnError = false,
-                            LogArtifactId = 5,
                             Name = "Build",
                             Order = 2,
                             PipelineId = 2,
@@ -314,7 +239,6 @@ namespace CiCd.Migrations
                             Id = 6,
                             Command = "terraform validate",
                             ContinueOnError = false,
-                            LogArtifactId = 6,
                             Name = "Validate",
                             Order = 1,
                             PipelineId = 3,
@@ -325,7 +249,6 @@ namespace CiCd.Migrations
                             Id = 7,
                             Command = "terraform plan",
                             ContinueOnError = false,
-                            LogArtifactId = 7,
                             Name = "Plan",
                             Order = 2,
                             PipelineId = 3,
@@ -336,7 +259,6 @@ namespace CiCd.Migrations
                             Id = 8,
                             Command = "terraform apply",
                             ContinueOnError = false,
-                            LogArtifactId = 8,
                             Name = "Apply",
                             Order = 3,
                             PipelineId = 3,
@@ -526,6 +448,12 @@ namespace CiCd.Migrations
                     b.Property<DateTime?>("FinishedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("LogOutput")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("");
+
                     b.Property<int>("PipelineId")
                         .HasColumnType("integer");
 
@@ -554,6 +482,7 @@ namespace CiCd.Migrations
                         {
                             Id = 1,
                             FinishedAt = new DateTime(2024, 5, 1, 10, 8, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Pipeline started.",
                             PipelineId = 1,
                             StartedAt = new DateTime(2024, 5, 1, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = 2,
@@ -564,6 +493,7 @@ namespace CiCd.Migrations
                         {
                             Id = 2,
                             FinishedAt = new DateTime(2024, 5, 2, 9, 3, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Pipeline started.",
                             PipelineId = 1,
                             StartedAt = new DateTime(2024, 5, 2, 9, 0, 0, 0, DateTimeKind.Utc),
                             Status = 3,
@@ -574,6 +504,7 @@ namespace CiCd.Migrations
                         {
                             Id = 3,
                             FinishedAt = new DateTime(2024, 5, 3, 14, 5, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Pipeline started.",
                             PipelineId = 2,
                             StartedAt = new DateTime(2024, 5, 3, 14, 0, 0, 0, DateTimeKind.Utc),
                             Status = 2,
@@ -583,6 +514,7 @@ namespace CiCd.Migrations
                         new
                         {
                             Id = 4,
+                            LogOutput = "Pipeline started.",
                             PipelineId = 2,
                             StartedAt = new DateTime(2024, 5, 4, 9, 30, 0, 0, DateTimeKind.Utc),
                             Status = 1,
@@ -593,6 +525,7 @@ namespace CiCd.Migrations
                         {
                             Id = 5,
                             FinishedAt = new DateTime(2024, 4, 10, 8, 7, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Pipeline started.",
                             PipelineId = 3,
                             StartedAt = new DateTime(2024, 4, 10, 8, 0, 0, 0, DateTimeKind.Utc),
                             Status = 2,
@@ -603,6 +536,7 @@ namespace CiCd.Migrations
                         {
                             Id = 6,
                             FinishedAt = new DateTime(2024, 4, 15, 12, 2, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Pipeline started.",
                             PipelineId = 3,
                             StartedAt = new DateTime(2024, 4, 15, 12, 0, 0, 0, DateTimeKind.Utc),
                             Status = 4,
@@ -619,10 +553,6 @@ namespace CiCd.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ConsoleOutput")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("ErrorMessage")
                         .HasColumnType("text");
 
@@ -635,8 +565,11 @@ namespace CiCd.Migrations
                     b.Property<DateTime?>("FinishedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("LogArtifactId")
-                        .HasColumnType("integer");
+                    b.Property<string>("LogOutput")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("");
 
                     b.Property<int>("RunLogId")
                         .HasColumnType("integer");
@@ -652,14 +585,167 @@ namespace CiCd.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LogArtifactId")
-                        .IsUnique();
-
                     b.HasIndex("RunLogId");
 
                     b.HasIndex("StepId");
 
                     b.ToTable("StepRuns");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ExecutionOrder = 1,
+                            ExitCode = 0,
+                            FinishedAt = new DateTime(2024, 5, 1, 10, 3, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Build started...\nRestore completed.\nBuild succeeded.",
+                            RunLogId = 1,
+                            StartedAt = new DateTime(2024, 5, 1, 10, 0, 1, 0, DateTimeKind.Utc),
+                            Status = 2,
+                            StepId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ExecutionOrder = 2,
+                            ExitCode = 0,
+                            FinishedAt = new DateTime(2024, 5, 1, 10, 7, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Test run started...\n42 tests passed.\n0 failed.",
+                            RunLogId = 1,
+                            StartedAt = new DateTime(2024, 5, 1, 10, 3, 1, 0, DateTimeKind.Utc),
+                            Status = 2,
+                            StepId = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            ExecutionOrder = 3,
+                            ExitCode = 0,
+                            FinishedAt = new DateTime(2024, 5, 1, 10, 8, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Deploying...\nDeployment complete.",
+                            RunLogId = 1,
+                            StartedAt = new DateTime(2024, 5, 1, 10, 7, 1, 0, DateTimeKind.Utc),
+                            Status = 2,
+                            StepId = 3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            ExecutionOrder = 1,
+                            ExitCode = 0,
+                            FinishedAt = new DateTime(2024, 5, 2, 9, 2, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Build started...\nBuild succeeded.",
+                            RunLogId = 2,
+                            StartedAt = new DateTime(2024, 5, 2, 9, 0, 1, 0, DateTimeKind.Utc),
+                            Status = 2,
+                            StepId = 1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            ErrorMessage = "Test project failed: assertion in PaymentServiceTests.ShouldChargeAmount.",
+                            ExecutionOrder = 2,
+                            ExitCode = 1,
+                            FinishedAt = new DateTime(2024, 5, 2, 9, 3, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Test run started...\n3 tests failed.",
+                            RunLogId = 2,
+                            StartedAt = new DateTime(2024, 5, 2, 9, 2, 1, 0, DateTimeKind.Utc),
+                            Status = 3,
+                            StepId = 2
+                        },
+                        new
+                        {
+                            Id = 6,
+                            ExecutionOrder = 1,
+                            ExitCode = 0,
+                            FinishedAt = new DateTime(2024, 5, 3, 14, 2, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Lint started...\nNo lint errors.",
+                            RunLogId = 3,
+                            StartedAt = new DateTime(2024, 5, 3, 14, 0, 1, 0, DateTimeKind.Utc),
+                            Status = 2,
+                            StepId = 4
+                        },
+                        new
+                        {
+                            Id = 7,
+                            ExecutionOrder = 2,
+                            ExitCode = 0,
+                            FinishedAt = new DateTime(2024, 5, 3, 14, 5, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Build started...\nBundle created.",
+                            RunLogId = 3,
+                            StartedAt = new DateTime(2024, 5, 3, 14, 2, 1, 0, DateTimeKind.Utc),
+                            Status = 2,
+                            StepId = 5
+                        },
+                        new
+                        {
+                            Id = 8,
+                            ExecutionOrder = 1,
+                            LogOutput = "Lint started...",
+                            RunLogId = 4,
+                            StartedAt = new DateTime(2024, 5, 4, 9, 30, 1, 0, DateTimeKind.Utc),
+                            Status = 1,
+                            StepId = 4
+                        },
+                        new
+                        {
+                            Id = 9,
+                            ExecutionOrder = 1,
+                            ExitCode = 0,
+                            FinishedAt = new DateTime(2024, 4, 10, 8, 1, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Terraform validate passed.",
+                            RunLogId = 5,
+                            StartedAt = new DateTime(2024, 4, 10, 8, 0, 1, 0, DateTimeKind.Utc),
+                            Status = 2,
+                            StepId = 6
+                        },
+                        new
+                        {
+                            Id = 10,
+                            ExecutionOrder = 2,
+                            ExitCode = 0,
+                            FinishedAt = new DateTime(2024, 4, 10, 8, 4, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Plan: 2 to add, 0 to change, 0 to destroy.",
+                            RunLogId = 5,
+                            StartedAt = new DateTime(2024, 4, 10, 8, 1, 1, 0, DateTimeKind.Utc),
+                            Status = 2,
+                            StepId = 7
+                        },
+                        new
+                        {
+                            Id = 11,
+                            ExecutionOrder = 3,
+                            ExitCode = 0,
+                            FinishedAt = new DateTime(2024, 4, 10, 8, 7, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Apply complete. Resources created.",
+                            RunLogId = 5,
+                            StartedAt = new DateTime(2024, 4, 10, 8, 4, 1, 0, DateTimeKind.Utc),
+                            Status = 2,
+                            StepId = 8
+                        },
+                        new
+                        {
+                            Id = 12,
+                            ExecutionOrder = 1,
+                            ExitCode = 0,
+                            FinishedAt = new DateTime(2024, 4, 15, 12, 1, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Terraform validate passed.",
+                            RunLogId = 6,
+                            StartedAt = new DateTime(2024, 4, 15, 12, 0, 1, 0, DateTimeKind.Utc),
+                            Status = 2,
+                            StepId = 6
+                        },
+                        new
+                        {
+                            Id = 13,
+                            ExecutionOrder = 2,
+                            FinishedAt = new DateTime(2024, 4, 15, 12, 2, 0, 0, DateTimeKind.Utc),
+                            LogOutput = "Plan in progress...\nRun cancelled by user.",
+                            RunLogId = 6,
+                            StartedAt = new DateTime(2024, 4, 15, 12, 1, 1, 0, DateTimeKind.Utc),
+                            Status = 4,
+                            StepId = 7
+                        });
                 });
 
             modelBuilder.Entity("CiCd.Models.User", b =>
@@ -675,6 +761,10 @@ namespace CiCd.Migrations
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DisplayName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -708,17 +798,17 @@ namespace CiCd.Migrations
                         {
                             Id = 1,
                             CreatedAt = new DateTime(2024, 1, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "alice@example.com",
-                            PasswordHash = "hash1",
+                            Email = "root@example.com",
+                            PasswordHash = "$2a$12$ybfAz8xjizHsbJIkLP4M/.t9c2qXPIoQ9buTjC.Y4LPS4ZH1txBoW",
                             Role = 0,
-                            Username = "alice"
+                            Username = "root"
                         },
                         new
                         {
                             Id = 2,
                             CreatedAt = new DateTime(2024, 2, 14, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "bob@example.com",
-                            PasswordHash = "hash2",
+                            PasswordHash = "$2a$12$ybfAz8xjizHsbJIkLP4M/.t9c2qXPIoQ9buTjC.Y4LPS4ZH1txBoW",
                             Role = 1,
                             Username = "bob"
                         },
@@ -727,7 +817,7 @@ namespace CiCd.Migrations
                             Id = 3,
                             CreatedAt = new DateTime(2024, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "carol@example.com",
-                            PasswordHash = "hash3",
+                            PasswordHash = "$2a$12$ybfAz8xjizHsbJIkLP4M/.t9c2qXPIoQ9buTjC.Y4LPS4ZH1txBoW",
                             Role = 1,
                             Username = "carol"
                         },
@@ -736,7 +826,7 @@ namespace CiCd.Migrations
                             Id = 4,
                             CreatedAt = new DateTime(2024, 4, 20, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "dave@example.com",
-                            PasswordHash = "hash4",
+                            PasswordHash = "$2a$12$ybfAz8xjizHsbJIkLP4M/.t9c2qXPIoQ9buTjC.Y4LPS4ZH1txBoW",
                             Role = 2,
                             Username = "dave"
                         });
@@ -747,7 +837,8 @@ namespace CiCd.Migrations
                     b.HasOne("CiCd.Models.RunLog", "RunLog")
                         .WithMany("Artifacts")
                         .HasForeignKey("RunLogId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("RunLog");
                 });
@@ -765,18 +856,11 @@ namespace CiCd.Migrations
 
             modelBuilder.Entity("CiCd.Models.PipelineStep", b =>
                 {
-                    b.HasOne("CiCd.Models.Artifact", "LogArtifact")
-                        .WithOne()
-                        .HasForeignKey("CiCd.Models.PipelineStep", "LogArtifactId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("CiCd.Models.Pipeline", "Pipeline")
                         .WithMany("Steps")
                         .HasForeignKey("PipelineId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("LogArtifact");
 
                     b.Navigation("Pipeline");
                 });
@@ -832,11 +916,6 @@ namespace CiCd.Migrations
 
             modelBuilder.Entity("CiCd.Models.StepRun", b =>
                 {
-                    b.HasOne("CiCd.Models.Artifact", "LogArtifact")
-                        .WithOne()
-                        .HasForeignKey("CiCd.Models.StepRun", "LogArtifactId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("CiCd.Models.RunLog", "RunLog")
                         .WithMany("StepRuns")
                         .HasForeignKey("RunLogId")
@@ -848,8 +927,6 @@ namespace CiCd.Migrations
                         .HasForeignKey("StepId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("LogArtifact");
 
                     b.Navigation("RunLog");
 

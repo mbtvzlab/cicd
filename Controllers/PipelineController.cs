@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CiCd.Data;
 using CiCd.Models;
@@ -6,6 +7,7 @@ using CiCd.ViewModels;
 namespace CiCd.Controllers;
 
 [Route("pipelines")]
+[Authorize(Roles = "Admin,Developer,Viewer")]
 public class PipelineController : Controller
 {
     private readonly IPipelineRepository _pipelineRepository;
@@ -50,6 +52,7 @@ public class PipelineController : Controller
 
     [HttpPost("create")]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Developer")]
     public IActionResult Create(PipelineCreateModel model)
     {
         if (!ModelState.IsValid)
@@ -90,6 +93,7 @@ public class PipelineController : Controller
 
     [HttpPost("{id:int}/edit")]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Developer")]
     public IActionResult Edit(int id, PipelineEditModel model)
     {
         if (id != model.Id) return BadRequest();
@@ -111,6 +115,7 @@ public class PipelineController : Controller
 
     [HttpPost("{id:int}/delete")]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public IActionResult Delete(int id)
     {
         _pipelineRepository.Delete(id);

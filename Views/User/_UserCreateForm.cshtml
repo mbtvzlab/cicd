@@ -9,6 +9,14 @@
 </div>
 
 <div class="info-row">
+    <label asp-for="DisplayName" class="info-label"></label>
+    <div class="info-value">
+        <input asp-for="DisplayName" class="form-control" style="width:100%;padding:6px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:12px;" />
+        <span asp-validation-for="DisplayName" style="color:var(--failed);font-size:11px;"></span>
+    </div>
+</div>
+
+<div class="info-row">
     <label asp-for="Email" class="info-label"></label>
     <div class="info-value">
         <input asp-for="Email" class="form-control" style="width:100%;padding:6px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:12px;" />
@@ -29,6 +37,6 @@
     <div class="info-value">
         <input asp-for="Password" type="password" class="form-control" style="width:100%;padding:6px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:12px;" />
         <span asp-validation-for="Password" style="color:var(--failed);font-size:11px;"></span>
-        <small style="color:var(--text-muted);font-size:11px;">Leave blank to keep the existing password.</small>
+        <small style="color:var(--text-muted);font-size:11px;">Initial password for the new account. The user can change it later in Settings.</small>
     </div>
 </div>

@@ -16,10 +16,6 @@ public class PipelineMockRepository : IPipelineRepository
         var projectFe = new Project { Id = 2, Name = "Frontend", IsActive = true };
         var projectInfra = new Project { Id = 3, Name = "Infrastructure", IsActive = false };
 
-        var logArtifact1 = new Artifact { Id = 1, FileName = "build.log", BlobUrl = "https://s3.example.com/logs/1/build.log", SizeBytes = 4096, CreatedAt = new DateTime(2024, 5, 1, 10, 5, 0) };
-        var logArtifact2 = new Artifact { Id = 2, FileName = "test.log", BlobUrl = "https://s3.example.com/logs/1/test.log", SizeBytes = 8192, CreatedAt = new DateTime(2024, 5, 1, 10, 6, 0) };
-        var logArtifact3 = new Artifact { Id = 3, FileName = "deploy.log", BlobUrl = "https://s3.example.com/logs/1/deploy.log", SizeBytes = 1024, CreatedAt = new DateTime(2024, 5, 1, 10, 7, 0) };
-
         var pipelineCi = new Pipeline
         {
             Id = 1,
@@ -31,9 +27,9 @@ public class PipelineMockRepository : IPipelineRepository
             Project = projectApi,
             Steps =
             [
-                new PipelineStep { Id = 1, Name = "Build", Command = "dotnet build", Order = 1, TimeoutSeconds = 120, ContinueOnError = false, LogArtifact = logArtifact1 },
-                new PipelineStep { Id = 2, Name = "Test", Command = "dotnet test", Order = 2, TimeoutSeconds = 180, ContinueOnError = false, LogArtifact = logArtifact2 },
-                new PipelineStep { Id = 3, Name = "Deploy", Command = "./deploy.sh", Order = 3, TimeoutSeconds = 60, ContinueOnError = false, LogArtifact = logArtifact3 },
+                new PipelineStep { Id = 1, Name = "Build", Command = "dotnet build", Order = 1, TimeoutSeconds = 120, ContinueOnError = false },
+                new PipelineStep { Id = 2, Name = "Test", Command = "dotnet test", Order = 2, TimeoutSeconds = 180, ContinueOnError = false },
+                new PipelineStep { Id = 3, Name = "Deploy", Command = "./deploy.sh", Order = 3, TimeoutSeconds = 60, ContinueOnError = false },
             ],
             RunLogs =
             [
@@ -42,20 +38,30 @@ public class PipelineMockRepository : IPipelineRepository
                     Id = 1, Pipeline = null!, TriggeredBy = bob,
                     StartedAt = new DateTime(2024, 5, 1, 10, 0, 0), FinishedAt = new DateTime(2024, 5, 1, 10, 8, 0),
                     Status = RunStatus.Success, TriggerType = TriggerType.Push,
+                    LogOutput = "Pipeline started.",
                     Artifacts = [new Artifact { Id = 10, FileName = "api.zip", BlobUrl = "https://s3.example.com/artifacts/api.zip", SizeBytes = 512000, CreatedAt = new DateTime(2024, 5, 1, 10, 8, 0) }],
+                    StepRuns =
+                    [
+                        new StepRun { Id = 1, Step = new PipelineStep { Id = 1, Name = "Build" }, ExecutionOrder = 1, StartedAt = new DateTime(2024, 5, 1, 10, 0, 1), FinishedAt = new DateTime(2024, 5, 1, 10, 3, 0), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Build started...\nBuild succeeded." },
+                        new StepRun { Id = 2, Step = new PipelineStep { Id = 2, Name = "Test" }, ExecutionOrder = 2, StartedAt = new DateTime(2024, 5, 1, 10, 3, 1), FinishedAt = new DateTime(2024, 5, 1, 10, 7, 0), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Test run started...\n42 tests passed." },
+                        new StepRun { Id = 3, Step = new PipelineStep { Id = 3, Name = "Deploy" }, ExecutionOrder = 3, StartedAt = new DateTime(2024, 5, 1, 10, 7, 1), FinishedAt = new DateTime(2024, 5, 1, 10, 8, 0), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Deploying...\nDeployment complete." }
+                    ]
                 },
                 new RunLog
                 {
                     Id = 2, Pipeline = null!, TriggeredBy = alice,
                     StartedAt = new DateTime(2024, 5, 2, 9, 0, 0), FinishedAt = new DateTime(2024, 5, 2, 9, 3, 0),
                     Status = RunStatus.Failed, TriggerType = TriggerType.PullRequest,
+                    LogOutput = "Pipeline started.",
                     Artifacts = [],
+                    StepRuns =
+                    [
+                        new StepRun { Id = 4, Step = new PipelineStep { Id = 1, Name = "Build" }, ExecutionOrder = 1, StartedAt = new DateTime(2024, 5, 2, 9, 0, 1), FinishedAt = new DateTime(2024, 5, 2, 9, 2, 0), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Build started...\nBuild succeeded." },
+                        new StepRun { Id = 5, Step = new PipelineStep { Id = 2, Name = "Test" }, ExecutionOrder = 2, StartedAt = new DateTime(2024, 5, 2, 9, 2, 1), FinishedAt = new DateTime(2024, 5, 2, 9, 3, 0), Status = StepRunStatus.Failed, ExitCode = 1, ErrorMessage = "Test project failed: assertion in PaymentServiceTests.ShouldChargeAmount.", LogOutput = "Test run started...\n3 tests failed." }
+                    ]
                 },
             ]
         };
-
-        var logArtifact4 = new Artifact { Id = 4, FileName = "lint.log", BlobUrl = "https://s3.example.com/logs/2/lint.log", SizeBytes = 2048, CreatedAt = new DateTime(2024, 5, 3, 14, 1, 0) };
-        var logArtifact5 = new Artifact { Id = 5, FileName = "build.log", BlobUrl = "https://s3.example.com/logs/2/build.log", SizeBytes = 6144, CreatedAt = new DateTime(2024, 5, 3, 14, 3, 0) };
 
         var pipelineFeCI = new Pipeline
         {
@@ -68,8 +74,8 @@ public class PipelineMockRepository : IPipelineRepository
             Project = projectFe,
             Steps =
             [
-                new PipelineStep { Id = 4, Name = "Lint", Command = "npm run lint", Order = 1, TimeoutSeconds = 60, ContinueOnError = false, LogArtifact = logArtifact4 },
-                new PipelineStep { Id = 5, Name = "Build", Command = "npm run build", Order = 2, TimeoutSeconds = 120, ContinueOnError = false, LogArtifact = logArtifact5 },
+                new PipelineStep { Id = 4, Name = "Lint", Command = "npm run lint", Order = 1, TimeoutSeconds = 60, ContinueOnError = false },
+                new PipelineStep { Id = 5, Name = "Build", Command = "npm run build", Order = 2, TimeoutSeconds = 120, ContinueOnError = false },
             ],
             RunLogs =
             [
@@ -78,21 +84,28 @@ public class PipelineMockRepository : IPipelineRepository
                     Id = 3, Pipeline = null!, TriggeredBy = carol,
                     StartedAt = new DateTime(2024, 5, 3, 14, 0, 0), FinishedAt = new DateTime(2024, 5, 3, 14, 5, 0),
                     Status = RunStatus.Success, TriggerType = TriggerType.Push,
+                    LogOutput = "Pipeline started.",
                     Artifacts = [new Artifact { Id = 11, FileName = "dist.zip", BlobUrl = "https://s3.example.com/artifacts/dist.zip", SizeBytes = 204800, CreatedAt = new DateTime(2024, 5, 3, 14, 5, 0) }],
+                    StepRuns =
+                    [
+                        new StepRun { Id = 6, Step = new PipelineStep { Id = 4, Name = "Lint" }, ExecutionOrder = 1, StartedAt = new DateTime(2024, 5, 3, 14, 0, 1), FinishedAt = new DateTime(2024, 5, 3, 14, 2, 0), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Lint started...\nNo lint errors." },
+                        new StepRun { Id = 7, Step = new PipelineStep { Id = 5, Name = "Build" }, ExecutionOrder = 2, StartedAt = new DateTime(2024, 5, 3, 14, 2, 1), FinishedAt = new DateTime(2024, 5, 3, 14, 5, 0), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Build started...\nBundle created." }
+                    ]
                 },
                 new RunLog
                 {
                     Id = 4, Pipeline = null!, TriggeredBy = bob,
                     StartedAt = new DateTime(2024, 5, 4, 9, 30, 0), FinishedAt = null,
                     Status = RunStatus.Running, TriggerType = TriggerType.Manual,
+                    LogOutput = "Pipeline started.",
                     Artifacts = [],
+                    StepRuns =
+                    [
+                        new StepRun { Id = 8, Step = new PipelineStep { Id = 4, Name = "Lint" }, ExecutionOrder = 1, StartedAt = new DateTime(2024, 5, 4, 9, 30, 1), FinishedAt = null, Status = StepRunStatus.Running, ExitCode = null, LogOutput = "Lint started..." }
+                    ]
                 },
             ]
         };
-
-        var logArtifact6 = new Artifact { Id = 6, FileName = "validate.log", BlobUrl = "https://s3.example.com/logs/3/validate.log", SizeBytes = 512, CreatedAt = new DateTime(2024, 4, 10, 8, 1, 0) };
-        var logArtifact7 = new Artifact { Id = 7, FileName = "plan.log", BlobUrl = "https://s3.example.com/logs/3/plan.log", SizeBytes = 3072, CreatedAt = new DateTime(2024, 4, 10, 8, 3, 0) };
-        var logArtifact8 = new Artifact { Id = 8, FileName = "apply.log", BlobUrl = "https://s3.example.com/logs/3/apply.log", SizeBytes = 2048, CreatedAt = new DateTime(2024, 4, 10, 8, 6, 0) };
 
         var pipelineTf = new Pipeline
         {
@@ -105,9 +118,9 @@ public class PipelineMockRepository : IPipelineRepository
             Project = projectInfra,
             Steps =
             [
-                new PipelineStep { Id = 6, Name = "Validate", Command = "terraform validate", Order = 1, TimeoutSeconds = 30, ContinueOnError = false, LogArtifact = logArtifact6 },
-                new PipelineStep { Id = 7, Name = "Plan", Command = "terraform plan", Order = 2, TimeoutSeconds = 120, ContinueOnError = false, LogArtifact = logArtifact7 },
-                new PipelineStep { Id = 8, Name = "Apply", Command = "terraform apply", Order = 3, TimeoutSeconds = 300, ContinueOnError = false, LogArtifact = logArtifact8 },
+                new PipelineStep { Id = 6, Name = "Validate", Command = "terraform validate", Order = 1, TimeoutSeconds = 30, ContinueOnError = false },
+                new PipelineStep { Id = 7, Name = "Plan", Command = "terraform plan", Order = 2, TimeoutSeconds = 120, ContinueOnError = false },
+                new PipelineStep { Id = 8, Name = "Apply", Command = "terraform apply", Order = 3, TimeoutSeconds = 300, ContinueOnError = false },
             ],
             RunLogs =
             [
@@ -116,14 +129,27 @@ public class PipelineMockRepository : IPipelineRepository
                     Id = 5, Pipeline = null!, TriggeredBy = alice,
                     StartedAt = new DateTime(2024, 4, 10, 8, 0, 0), FinishedAt = new DateTime(2024, 4, 10, 8, 7, 0),
                     Status = RunStatus.Success, TriggerType = TriggerType.Manual,
+                    LogOutput = "Pipeline started.",
                     Artifacts = [],
+                    StepRuns =
+                    [
+                        new StepRun { Id = 9, Step = new PipelineStep { Id = 6, Name = "Validate" }, ExecutionOrder = 1, StartedAt = new DateTime(2024, 4, 10, 8, 0, 1), FinishedAt = new DateTime(2024, 4, 10, 8, 1, 0), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Terraform validate passed." },
+                        new StepRun { Id = 10, Step = new PipelineStep { Id = 7, Name = "Plan" }, ExecutionOrder = 2, StartedAt = new DateTime(2024, 4, 10, 8, 1, 1), FinishedAt = new DateTime(2024, 4, 10, 8, 4, 0), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Plan: 2 to add, 0 to change, 0 to destroy." },
+                        new StepRun { Id = 11, Step = new PipelineStep { Id = 8, Name = "Apply" }, ExecutionOrder = 3, StartedAt = new DateTime(2024, 4, 10, 8, 4, 1), FinishedAt = new DateTime(2024, 4, 10, 8, 7, 0), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Apply complete. Resources created." }
+                    ]
                 },
                 new RunLog
                 {
                     Id = 6, Pipeline = null!, TriggeredBy = alice,
                     StartedAt = new DateTime(2024, 4, 15, 12, 0, 0), FinishedAt = new DateTime(2024, 4, 15, 12, 2, 0),
                     Status = RunStatus.Cancelled, TriggerType = TriggerType.Schedule,
+                    LogOutput = "Pipeline started.",
                     Artifacts = [],
+                    StepRuns =
+                    [
+                        new StepRun { Id = 12, Step = new PipelineStep { Id = 6, Name = "Validate" }, ExecutionOrder = 1, StartedAt = new DateTime(2024, 4, 15, 12, 0, 1), FinishedAt = new DateTime(2024, 4, 15, 12, 1, 0), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Terraform validate passed." },
+                        new StepRun { Id = 13, Step = new PipelineStep { Id = 7, Name = "Plan" }, ExecutionOrder = 2, StartedAt = new DateTime(2024, 4, 15, 12, 1, 1), FinishedAt = new DateTime(2024, 4, 15, 12, 2, 0), Status = StepRunStatus.Cancelled, ExitCode = null, LogOutput = "Plan in progress...\nRun cancelled by user." }
+                    ]
                 },
             ]
         };

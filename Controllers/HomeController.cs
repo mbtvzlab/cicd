@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CiCd.Data;
 using CiCd.Models;
@@ -6,6 +7,7 @@ using CiCd.ViewModels;
 
 namespace CiCd.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private readonly IProjectRepository _projectRepository;

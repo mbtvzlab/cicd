@@ -21,9 +21,11 @@ namespace CiCd.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Username = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    DisplayName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     Email = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     PasswordHash = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Role = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -41,6 +43,7 @@ namespace CiCd.Migrations
                     Description = table.Column<string>(type: "text", nullable: false),
                     RepositoryUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     OwnerId = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -66,6 +69,7 @@ namespace CiCd.Migrations
                     Branch = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     IsEnabled = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     ProjectId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -108,6 +112,30 @@ namespace CiCd.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PipelineSteps",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Command = table.Column<string>(type: "text", nullable: false),
+                    Order = table.Column<int>(type: "integer", nullable: false),
+                    TimeoutSeconds = table.Column<int>(type: "integer", nullable: false),
+                    ContinueOnError = table.Column<bool>(type: "boolean", nullable: false),
+                    PipelineId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PipelineSteps", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PipelineSteps_Pipelines_PipelineId",
+                        column: x => x.PipelineId,
+                        principalTable: "Pipelines",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RunLogs",
                 columns: table => new
                 {
@@ -115,10 +143,12 @@ namespace CiCd.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     StartedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     FinishedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     TriggerType = table.Column<int>(type: "integer", nullable: false),
                     PipelineId = table.Column<int>(type: "integer", nullable: false),
-                    TriggeredByUserId = table.Column<int>(type: "integer", nullable: false)
+                    TriggeredByUserId = table.Column<int>(type: "integer", nullable: false),
+                    LogOutput = table.Column<string>(type: "text", nullable: false, defaultValue: "")
                 },
                 constraints: table =>
                 {
@@ -147,7 +177,7 @@ namespace CiCd.Migrations
                     BlobUrl = table.Column<string>(type: "text", nullable: false),
                     SizeBytes = table.Column<long>(type: "bigint", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    RunLogId = table.Column<int>(type: "integer", nullable: true)
+                    RunLogId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -156,37 +186,6 @@ namespace CiCd.Migrations
                         name: "FK_Artifacts_RunLogs_RunLogId",
                         column: x => x.RunLogId,
                         principalTable: "RunLogs",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PipelineSteps",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Command = table.Column<string>(type: "text", nullable: false),
-                    Order = table.Column<int>(type: "integer", nullable: false),
-                    TimeoutSeconds = table.Column<int>(type: "integer", nullable: false),
-                    ContinueOnError = table.Column<bool>(type: "boolean", nullable: false),
-                    PipelineId = table.Column<int>(type: "integer", nullable: false),
-                    LogArtifactId = table.Column<int>(type: "integer", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PipelineSteps", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PipelineSteps_Artifacts_LogArtifactId",
-                        column: x => x.LogArtifactId,
-                        principalTable: "Artifacts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_PipelineSteps_Pipelines_PipelineId",
-                        column: x => x.PipelineId,
-                        principalTable: "Pipelines",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -204,19 +203,12 @@ namespace CiCd.Migrations
                     FinishedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     ExitCode = table.Column<int>(type: "integer", nullable: true),
-                    ConsoleOutput = table.Column<string>(type: "text", nullable: false),
-                    ErrorMessage = table.Column<string>(type: "text", nullable: true),
-                    LogArtifactId = table.Column<int>(type: "integer", nullable: true)
+                    LogOutput = table.Column<string>(type: "text", nullable: false, defaultValue: ""),
+                    ErrorMessage = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StepRuns", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_StepRuns_Artifacts_LogArtifactId",
-                        column: x => x.LogArtifactId,
-                        principalTable: "Artifacts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_StepRuns_PipelineSteps_StepId",
                         column: x => x.StepId,
@@ -232,49 +224,34 @@ namespace CiCd.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Artifacts",
-                columns: new[] { "Id", "BlobUrl", "CreatedAt", "FileName", "RunLogId", "SizeBytes" },
-                values: new object[,]
-                {
-                    { 1, "https://s3.example.com/logs/1/build.log", new DateTime(2024, 5, 1, 10, 5, 0, 0, DateTimeKind.Utc), "build.log", null, 4096L },
-                    { 2, "https://s3.example.com/logs/1/test.log", new DateTime(2024, 5, 1, 10, 6, 0, 0, DateTimeKind.Utc), "test.log", null, 8192L },
-                    { 3, "https://s3.example.com/logs/1/deploy.log", new DateTime(2024, 5, 1, 10, 7, 0, 0, DateTimeKind.Utc), "deploy.log", null, 1024L },
-                    { 4, "https://s3.example.com/logs/2/lint.log", new DateTime(2024, 5, 3, 14, 1, 0, 0, DateTimeKind.Utc), "lint.log", null, 2048L },
-                    { 5, "https://s3.example.com/logs/2/build.log", new DateTime(2024, 5, 3, 14, 3, 0, 0, DateTimeKind.Utc), "build.log", null, 6144L },
-                    { 6, "https://s3.example.com/logs/3/validate.log", new DateTime(2024, 4, 10, 8, 1, 0, 0, DateTimeKind.Utc), "validate.log", null, 512L },
-                    { 7, "https://s3.example.com/logs/3/plan.log", new DateTime(2024, 4, 10, 8, 3, 0, 0, DateTimeKind.Utc), "plan.log", null, 3072L },
-                    { 8, "https://s3.example.com/logs/3/apply.log", new DateTime(2024, 4, 10, 8, 6, 0, 0, DateTimeKind.Utc), "apply.log", null, 2048L }
-                });
-
-            migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "CreatedAt", "Email", "PasswordHash", "Role", "Username" },
+                columns: new[] { "Id", "CreatedAt", "DeletedAt", "DisplayName", "Email", "PasswordHash", "Role", "Username" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2024, 1, 10, 0, 0, 0, 0, DateTimeKind.Utc), "alice@example.com", "hash1", 0, "alice" },
-                    { 2, new DateTime(2024, 2, 14, 0, 0, 0, 0, DateTimeKind.Utc), "bob@example.com", "hash2", 1, "bob" },
-                    { 3, new DateTime(2024, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc), "carol@example.com", "hash3", 1, "carol" },
-                    { 4, new DateTime(2024, 4, 20, 0, 0, 0, 0, DateTimeKind.Utc), "dave@example.com", "hash4", 2, "dave" }
+                    { 1, new DateTime(2024, 1, 10, 0, 0, 0, 0, DateTimeKind.Utc), null, null, "root@example.com", "$2a$12$ybfAz8xjizHsbJIkLP4M/.t9c2qXPIoQ9buTjC.Y4LPS4ZH1txBoW", 0, "root" },
+                    { 2, new DateTime(2024, 2, 14, 0, 0, 0, 0, DateTimeKind.Utc), null, null, "bob@example.com", "$2a$12$ybfAz8xjizHsbJIkLP4M/.t9c2qXPIoQ9buTjC.Y4LPS4ZH1txBoW", 1, "bob" },
+                    { 3, new DateTime(2024, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc), null, null, "carol@example.com", "$2a$12$ybfAz8xjizHsbJIkLP4M/.t9c2qXPIoQ9buTjC.Y4LPS4ZH1txBoW", 1, "carol" },
+                    { 4, new DateTime(2024, 4, 20, 0, 0, 0, 0, DateTimeKind.Utc), null, null, "dave@example.com", "$2a$12$ybfAz8xjizHsbJIkLP4M/.t9c2qXPIoQ9buTjC.Y4LPS4ZH1txBoW", 2, "dave" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Projects",
-                columns: new[] { "Id", "CreatedAt", "Description", "IsActive", "Name", "OwnerId", "RepositoryUrl" },
+                columns: new[] { "Id", "CreatedAt", "DeletedAt", "Description", "IsActive", "Name", "OwnerId", "RepositoryUrl" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), "Backend REST API service", true, "REST API", 1, "https://github.com/example/rest-api" },
-                    { 2, new DateTime(2024, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc), "React/TypeScript frontend application", true, "Frontend", 3, "https://github.com/example/frontend" },
-                    { 3, new DateTime(2024, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Terraform configs and deployment scripts", false, "Infrastructure", 1, "https://github.com/example/infra" }
+                    { 1, new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), null, "Backend REST API service", true, "REST API", 1, "https://github.com/example/rest-api" },
+                    { 2, new DateTime(2024, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "React/TypeScript frontend application", true, "Frontend", 3, "https://github.com/example/frontend" },
+                    { 3, new DateTime(2024, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "Terraform configs and deployment scripts", false, "Infrastructure", 1, "https://github.com/example/infra" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Pipelines",
-                columns: new[] { "Id", "Branch", "CreatedAt", "Description", "IsEnabled", "Name", "ProjectId" },
+                columns: new[] { "Id", "Branch", "CreatedAt", "DeletedAt", "Description", "IsEnabled", "Name", "ProjectId" },
                 values: new object[,]
                 {
-                    { 1, "main", new DateTime(2024, 1, 20, 0, 0, 0, 0, DateTimeKind.Utc), "Build and test on every push", true, "CI Pipeline", 1 },
-                    { 2, "main", new DateTime(2024, 2, 10, 0, 0, 0, 0, DateTimeKind.Utc), "Lint and build the frontend bundle", true, "Frontend CI", 2 },
-                    { 3, "main", new DateTime(2024, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc), "Validate, plan and apply infrastructure changes", false, "Terraform Apply", 3 }
+                    { 1, "main", new DateTime(2024, 1, 20, 0, 0, 0, 0, DateTimeKind.Utc), null, "Build and test on every push", true, "CI Pipeline", 1 },
+                    { 2, "main", new DateTime(2024, 2, 10, 0, 0, 0, 0, DateTimeKind.Utc), null, "Lint and build the frontend bundle", true, "Frontend CI", 2 },
+                    { 3, "main", new DateTime(2024, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc), null, "Validate, plan and apply infrastructure changes", false, "Terraform Apply", 3 }
                 });
 
             migrationBuilder.InsertData(
@@ -294,30 +271,30 @@ namespace CiCd.Migrations
 
             migrationBuilder.InsertData(
                 table: "PipelineSteps",
-                columns: new[] { "Id", "Command", "ContinueOnError", "LogArtifactId", "Name", "Order", "PipelineId", "TimeoutSeconds" },
+                columns: new[] { "Id", "Command", "ContinueOnError", "Name", "Order", "PipelineId", "TimeoutSeconds" },
                 values: new object[,]
                 {
-                    { 1, "dotnet build", false, 1, "Build", 1, 1, 120 },
-                    { 2, "dotnet test", false, 2, "Test", 2, 1, 180 },
-                    { 3, "./deploy.sh", false, 3, "Deploy", 3, 1, 60 },
-                    { 4, "npm run lint", false, 4, "Lint", 1, 2, 60 },
-                    { 5, "npm run build", false, 5, "Build", 2, 2, 120 },
-                    { 6, "terraform validate", false, 6, "Validate", 1, 3, 30 },
-                    { 7, "terraform plan", false, 7, "Plan", 2, 3, 120 },
-                    { 8, "terraform apply", false, 8, "Apply", 3, 3, 300 }
+                    { 1, "dotnet build", false, "Build", 1, 1, 120 },
+                    { 2, "dotnet test", false, "Test", 2, 1, 180 },
+                    { 3, "./deploy.sh", false, "Deploy", 3, 1, 60 },
+                    { 4, "npm run lint", false, "Lint", 1, 2, 60 },
+                    { 5, "npm run build", false, "Build", 2, 2, 120 },
+                    { 6, "terraform validate", false, "Validate", 1, 3, 30 },
+                    { 7, "terraform plan", false, "Plan", 2, 3, 120 },
+                    { 8, "terraform apply", false, "Apply", 3, 3, 300 }
                 });
 
             migrationBuilder.InsertData(
                 table: "RunLogs",
-                columns: new[] { "Id", "FinishedAt", "PipelineId", "StartedAt", "Status", "TriggerType", "TriggeredByUserId" },
+                columns: new[] { "Id", "DeletedAt", "FinishedAt", "LogOutput", "PipelineId", "StartedAt", "Status", "TriggerType", "TriggeredByUserId" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2024, 5, 1, 10, 8, 0, 0, DateTimeKind.Utc), 1, new DateTime(2024, 5, 1, 10, 0, 0, 0, DateTimeKind.Utc), 2, 1, 2 },
-                    { 2, new DateTime(2024, 5, 2, 9, 3, 0, 0, DateTimeKind.Utc), 1, new DateTime(2024, 5, 2, 9, 0, 0, 0, DateTimeKind.Utc), 3, 3, 1 },
-                    { 3, new DateTime(2024, 5, 3, 14, 5, 0, 0, DateTimeKind.Utc), 2, new DateTime(2024, 5, 3, 14, 0, 0, 0, DateTimeKind.Utc), 2, 1, 3 },
-                    { 4, null, 2, new DateTime(2024, 5, 4, 9, 30, 0, 0, DateTimeKind.Utc), 1, 0, 2 },
-                    { 5, new DateTime(2024, 4, 10, 8, 7, 0, 0, DateTimeKind.Utc), 3, new DateTime(2024, 4, 10, 8, 0, 0, 0, DateTimeKind.Utc), 2, 0, 1 },
-                    { 6, new DateTime(2024, 4, 15, 12, 2, 0, 0, DateTimeKind.Utc), 3, new DateTime(2024, 4, 15, 12, 0, 0, 0, DateTimeKind.Utc), 4, 2, 1 }
+                    { 1, null, new DateTime(2024, 5, 1, 10, 8, 0, 0, DateTimeKind.Utc), "Pipeline started.", 1, new DateTime(2024, 5, 1, 10, 0, 0, 0, DateTimeKind.Utc), 2, 1, 2 },
+                    { 2, null, new DateTime(2024, 5, 2, 9, 3, 0, 0, DateTimeKind.Utc), "Pipeline started.", 1, new DateTime(2024, 5, 2, 9, 0, 0, 0, DateTimeKind.Utc), 3, 3, 1 },
+                    { 3, null, new DateTime(2024, 5, 3, 14, 5, 0, 0, DateTimeKind.Utc), "Pipeline started.", 2, new DateTime(2024, 5, 3, 14, 0, 0, 0, DateTimeKind.Utc), 2, 1, 3 },
+                    { 4, null, null, "Pipeline started.", 2, new DateTime(2024, 5, 4, 9, 30, 0, 0, DateTimeKind.Utc), 1, 0, 2 },
+                    { 5, null, new DateTime(2024, 4, 10, 8, 7, 0, 0, DateTimeKind.Utc), "Pipeline started.", 3, new DateTime(2024, 4, 10, 8, 0, 0, 0, DateTimeKind.Utc), 2, 0, 1 },
+                    { 6, null, new DateTime(2024, 4, 15, 12, 2, 0, 0, DateTimeKind.Utc), "Pipeline started.", 3, new DateTime(2024, 4, 15, 12, 0, 0, 0, DateTimeKind.Utc), 4, 2, 1 }
                 });
 
             migrationBuilder.InsertData(
@@ -329,6 +306,26 @@ namespace CiCd.Migrations
                     { 11, "https://s3.example.com/artifacts/dist.zip", new DateTime(2024, 5, 3, 14, 5, 0, 0, DateTimeKind.Utc), "dist.zip", 3, 204800L }
                 });
 
+            migrationBuilder.InsertData(
+                table: "StepRuns",
+                columns: new[] { "Id", "ErrorMessage", "ExecutionOrder", "ExitCode", "FinishedAt", "LogOutput", "RunLogId", "StartedAt", "Status", "StepId" },
+                values: new object[,]
+                {
+                    { 1, null, 1, 0, new DateTime(2024, 5, 1, 10, 3, 0, 0, DateTimeKind.Utc), "Build started...\nRestore completed.\nBuild succeeded.", 1, new DateTime(2024, 5, 1, 10, 0, 1, 0, DateTimeKind.Utc), 2, 1 },
+                    { 2, null, 2, 0, new DateTime(2024, 5, 1, 10, 7, 0, 0, DateTimeKind.Utc), "Test run started...\n42 tests passed.\n0 failed.", 1, new DateTime(2024, 5, 1, 10, 3, 1, 0, DateTimeKind.Utc), 2, 2 },
+                    { 3, null, 3, 0, new DateTime(2024, 5, 1, 10, 8, 0, 0, DateTimeKind.Utc), "Deploying...\nDeployment complete.", 1, new DateTime(2024, 5, 1, 10, 7, 1, 0, DateTimeKind.Utc), 2, 3 },
+                    { 4, null, 1, 0, new DateTime(2024, 5, 2, 9, 2, 0, 0, DateTimeKind.Utc), "Build started...\nBuild succeeded.", 2, new DateTime(2024, 5, 2, 9, 0, 1, 0, DateTimeKind.Utc), 2, 1 },
+                    { 5, "Test project failed: assertion in PaymentServiceTests.ShouldChargeAmount.", 2, 1, new DateTime(2024, 5, 2, 9, 3, 0, 0, DateTimeKind.Utc), "Test run started...\n3 tests failed.", 2, new DateTime(2024, 5, 2, 9, 2, 1, 0, DateTimeKind.Utc), 3, 2 },
+                    { 6, null, 1, 0, new DateTime(2024, 5, 3, 14, 2, 0, 0, DateTimeKind.Utc), "Lint started...\nNo lint errors.", 3, new DateTime(2024, 5, 3, 14, 0, 1, 0, DateTimeKind.Utc), 2, 4 },
+                    { 7, null, 2, 0, new DateTime(2024, 5, 3, 14, 5, 0, 0, DateTimeKind.Utc), "Build started...\nBundle created.", 3, new DateTime(2024, 5, 3, 14, 2, 1, 0, DateTimeKind.Utc), 2, 5 },
+                    { 8, null, 1, null, null, "Lint started...", 4, new DateTime(2024, 5, 4, 9, 30, 1, 0, DateTimeKind.Utc), 1, 4 },
+                    { 9, null, 1, 0, new DateTime(2024, 4, 10, 8, 1, 0, 0, DateTimeKind.Utc), "Terraform validate passed.", 5, new DateTime(2024, 4, 10, 8, 0, 1, 0, DateTimeKind.Utc), 2, 6 },
+                    { 10, null, 2, 0, new DateTime(2024, 4, 10, 8, 4, 0, 0, DateTimeKind.Utc), "Plan: 2 to add, 0 to change, 0 to destroy.", 5, new DateTime(2024, 4, 10, 8, 1, 1, 0, DateTimeKind.Utc), 2, 7 },
+                    { 11, null, 3, 0, new DateTime(2024, 4, 10, 8, 7, 0, 0, DateTimeKind.Utc), "Apply complete. Resources created.", 5, new DateTime(2024, 4, 10, 8, 4, 1, 0, DateTimeKind.Utc), 2, 8 },
+                    { 12, null, 1, 0, new DateTime(2024, 4, 15, 12, 1, 0, 0, DateTimeKind.Utc), "Terraform validate passed.", 6, new DateTime(2024, 4, 15, 12, 0, 1, 0, DateTimeKind.Utc), 2, 6 },
+                    { 13, null, 2, null, new DateTime(2024, 4, 15, 12, 2, 0, 0, DateTimeKind.Utc), "Plan in progress...\nRun cancelled by user.", 6, new DateTime(2024, 4, 15, 12, 1, 1, 0, DateTimeKind.Utc), 4, 7 }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Artifacts_RunLogId",
                 table: "Artifacts",
@@ -338,12 +335,6 @@ namespace CiCd.Migrations
                 name: "IX_Pipelines_ProjectId",
                 table: "Pipelines",
                 column: "ProjectId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PipelineSteps_LogArtifactId",
-                table: "PipelineSteps",
-                column: "LogArtifactId",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PipelineSteps_PipelineId",
@@ -376,12 +367,6 @@ namespace CiCd.Migrations
                 column: "TriggeredByUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StepRuns_LogArtifactId",
-                table: "StepRuns",
-                column: "LogArtifactId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_StepRuns_RunLogId",
                 table: "StepRuns",
                 column: "RunLogId");
@@ -408,6 +393,9 @@ namespace CiCd.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Artifacts");
+
+            migrationBuilder.DropTable(
                 name: "ProjectMembers");
 
             migrationBuilder.DropTable(
@@ -415,9 +403,6 @@ namespace CiCd.Migrations
 
             migrationBuilder.DropTable(
                 name: "PipelineSteps");
-
-            migrationBuilder.DropTable(
-                name: "Artifacts");
 
             migrationBuilder.DropTable(
                 name: "RunLogs");

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CiCd.Data;
 using CiCd.Models;
@@ -5,6 +6,7 @@ using CiCd.ViewModels;
 
 namespace CiCd.Controllers;
 
+[Authorize(Roles = "Admin,Developer,Viewer")]
 public class ProjectController : Controller
 {
     private readonly IProjectRepository _projectRepository;
@@ -46,6 +48,7 @@ public class ProjectController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Developer")]
     public IActionResult Create(ProjectCreateModel model)
     {
         if (!ModelState.IsValid)
@@ -85,6 +88,7 @@ public class ProjectController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Developer")]
     public async Task<IActionResult> Edit(int id, ProjectEditModel model)
     {
         if (id != model.Id) return BadRequest();
@@ -106,6 +110,7 @@ public class ProjectController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public IActionResult Delete(int id)
     {
         _projectRepository.Delete(id);

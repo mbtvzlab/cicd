@@ -20,6 +20,11 @@ public class CiCdDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<Artifact>(entity =>
+        {
+            entity.Property(e => e.RunLogId).IsRequired();
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasIndex(e => e.Username).IsUnique();
@@ -57,14 +62,6 @@ public class CiCdDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<PipelineStep>(entity =>
-        {
-            entity.HasOne(e => e.LogArtifact)
-                .WithOne()
-                .HasForeignKey<PipelineStep>(e => e.LogArtifactId)
-                .OnDelete(DeleteBehavior.SetNull);
-        });
-
         modelBuilder.Entity<RunLog>(entity =>
         {
             entity.HasOne(e => e.TriggeredBy)
@@ -81,6 +78,9 @@ public class CiCdDbContext : DbContext
                 .WithOne(s => s.RunLog)
                 .HasForeignKey(s => s.RunLogId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(e => e.LogOutput)
+                .HasDefaultValue("");
         });
 
         modelBuilder.Entity<StepRun>(entity =>
@@ -90,10 +90,8 @@ public class CiCdDbContext : DbContext
                 .HasForeignKey(e => e.StepId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(e => e.LogArtifact)
-                .WithOne()
-                .HasForeignKey<StepRun>(e => e.LogArtifactId)
-                .OnDelete(DeleteBehavior.SetNull);
+            entity.Property(e => e.LogOutput)
+                .HasDefaultValue("");
         });
 
         SeedData(modelBuilder);
@@ -101,11 +99,14 @@ public class CiCdDbContext : DbContext
 
     private static void SeedData(ModelBuilder modelBuilder)
     {
+        // Pre-computed BCrypt hash of the seed password "defaultpassword".
+        const string seedPasswordHash = "$2a$12$ybfAz8xjizHsbJIkLP4M/.t9c2qXPIoQ9buTjC.Y4LPS4ZH1txBoW";
+
         modelBuilder.Entity<User>().HasData(
-            new User { Id = 1, Username = "alice", Email = "alice@example.com", PasswordHash = "hash1", CreatedAt = new DateTime(2024, 1, 10, 0, 0, 0, DateTimeKind.Utc), Role = UserRole.Admin },
-            new User { Id = 2, Username = "bob", Email = "bob@example.com", PasswordHash = "hash2", CreatedAt = new DateTime(2024, 2, 14, 0, 0, 0, DateTimeKind.Utc), Role = UserRole.Developer },
-            new User { Id = 3, Username = "carol", Email = "carol@example.com", PasswordHash = "hash3", CreatedAt = new DateTime(2024, 3, 5, 0, 0, 0, DateTimeKind.Utc), Role = UserRole.Developer },
-            new User { Id = 4, Username = "dave", Email = "dave@example.com", PasswordHash = "hash4", CreatedAt = new DateTime(2024, 4, 20, 0, 0, 0, DateTimeKind.Utc), Role = UserRole.Viewer }
+            new User { Id = 1, Username = "root", Email = "root@example.com", PasswordHash = seedPasswordHash, CreatedAt = new DateTime(2024, 1, 10, 0, 0, 0, DateTimeKind.Utc), Role = UserRole.Admin },
+            new User { Id = 2, Username = "bob", Email = "bob@example.com", PasswordHash = seedPasswordHash, CreatedAt = new DateTime(2024, 2, 14, 0, 0, 0, DateTimeKind.Utc), Role = UserRole.Developer },
+            new User { Id = 3, Username = "carol", Email = "carol@example.com", PasswordHash = seedPasswordHash, CreatedAt = new DateTime(2024, 3, 5, 0, 0, 0, DateTimeKind.Utc), Role = UserRole.Developer },
+            new User { Id = 4, Username = "dave", Email = "dave@example.com", PasswordHash = seedPasswordHash, CreatedAt = new DateTime(2024, 4, 20, 0, 0, 0, DateTimeKind.Utc), Role = UserRole.Viewer }
         );
 
         modelBuilder.Entity<Project>().HasData(
@@ -126,14 +127,6 @@ public class CiCdDbContext : DbContext
         );
 
         modelBuilder.Entity<Artifact>().HasData(
-            new Artifact { Id = 1, FileName = "build.log", BlobUrl = "https://s3.example.com/logs/1/build.log", SizeBytes = 4096, CreatedAt = new DateTime(2024, 5, 1, 10, 5, 0, DateTimeKind.Utc), RunLogId = null },
-            new Artifact { Id = 2, FileName = "test.log", BlobUrl = "https://s3.example.com/logs/1/test.log", SizeBytes = 8192, CreatedAt = new DateTime(2024, 5, 1, 10, 6, 0, DateTimeKind.Utc), RunLogId = null },
-            new Artifact { Id = 3, FileName = "deploy.log", BlobUrl = "https://s3.example.com/logs/1/deploy.log", SizeBytes = 1024, CreatedAt = new DateTime(2024, 5, 1, 10, 7, 0, DateTimeKind.Utc), RunLogId = null },
-            new Artifact { Id = 4, FileName = "lint.log", BlobUrl = "https://s3.example.com/logs/2/lint.log", SizeBytes = 2048, CreatedAt = new DateTime(2024, 5, 3, 14, 1, 0, DateTimeKind.Utc), RunLogId = null },
-            new Artifact { Id = 5, FileName = "build.log", BlobUrl = "https://s3.example.com/logs/2/build.log", SizeBytes = 6144, CreatedAt = new DateTime(2024, 5, 3, 14, 3, 0, DateTimeKind.Utc), RunLogId = null },
-            new Artifact { Id = 6, FileName = "validate.log", BlobUrl = "https://s3.example.com/logs/3/validate.log", SizeBytes = 512, CreatedAt = new DateTime(2024, 4, 10, 8, 1, 0, DateTimeKind.Utc), RunLogId = null },
-            new Artifact { Id = 7, FileName = "plan.log", BlobUrl = "https://s3.example.com/logs/3/plan.log", SizeBytes = 3072, CreatedAt = new DateTime(2024, 4, 10, 8, 3, 0, DateTimeKind.Utc), RunLogId = null },
-            new Artifact { Id = 8, FileName = "apply.log", BlobUrl = "https://s3.example.com/logs/3/apply.log", SizeBytes = 2048, CreatedAt = new DateTime(2024, 4, 10, 8, 6, 0, DateTimeKind.Utc), RunLogId = null },
             new Artifact { Id = 10, FileName = "api.zip", BlobUrl = "https://s3.example.com/artifacts/api.zip", SizeBytes = 512000, CreatedAt = new DateTime(2024, 5, 1, 10, 8, 0, DateTimeKind.Utc), RunLogId = 1 },
             new Artifact { Id = 11, FileName = "dist.zip", BlobUrl = "https://s3.example.com/artifacts/dist.zip", SizeBytes = 204800, CreatedAt = new DateTime(2024, 5, 3, 14, 5, 0, DateTimeKind.Utc), RunLogId = 3 }
         );
@@ -145,23 +138,50 @@ public class CiCdDbContext : DbContext
         );
 
         modelBuilder.Entity<PipelineStep>().HasData(
-            new PipelineStep { Id = 1, Name = "Build", Command = "dotnet build", Order = 1, TimeoutSeconds = 120, ContinueOnError = false, PipelineId = 1, LogArtifactId = 1 },
-            new PipelineStep { Id = 2, Name = "Test", Command = "dotnet test", Order = 2, TimeoutSeconds = 180, ContinueOnError = false, PipelineId = 1, LogArtifactId = 2 },
-            new PipelineStep { Id = 3, Name = "Deploy", Command = "./deploy.sh", Order = 3, TimeoutSeconds = 60, ContinueOnError = false, PipelineId = 1, LogArtifactId = 3 },
-            new PipelineStep { Id = 4, Name = "Lint", Command = "npm run lint", Order = 1, TimeoutSeconds = 60, ContinueOnError = false, PipelineId = 2, LogArtifactId = 4 },
-            new PipelineStep { Id = 5, Name = "Build", Command = "npm run build", Order = 2, TimeoutSeconds = 120, ContinueOnError = false, PipelineId = 2, LogArtifactId = 5 },
-            new PipelineStep { Id = 6, Name = "Validate", Command = "terraform validate", Order = 1, TimeoutSeconds = 30, ContinueOnError = false, PipelineId = 3, LogArtifactId = 6 },
-            new PipelineStep { Id = 7, Name = "Plan", Command = "terraform plan", Order = 2, TimeoutSeconds = 120, ContinueOnError = false, PipelineId = 3, LogArtifactId = 7 },
-            new PipelineStep { Id = 8, Name = "Apply", Command = "terraform apply", Order = 3, TimeoutSeconds = 300, ContinueOnError = false, PipelineId = 3, LogArtifactId = 8 }
+            new PipelineStep { Id = 1, Name = "Build", Command = "dotnet build", Order = 1, TimeoutSeconds = 120, ContinueOnError = false, PipelineId = 1 },
+            new PipelineStep { Id = 2, Name = "Test", Command = "dotnet test", Order = 2, TimeoutSeconds = 180, ContinueOnError = false, PipelineId = 1 },
+            new PipelineStep { Id = 3, Name = "Deploy", Command = "./deploy.sh", Order = 3, TimeoutSeconds = 60, ContinueOnError = false, PipelineId = 1 },
+            new PipelineStep { Id = 4, Name = "Lint", Command = "npm run lint", Order = 1, TimeoutSeconds = 60, ContinueOnError = false, PipelineId = 2 },
+            new PipelineStep { Id = 5, Name = "Build", Command = "npm run build", Order = 2, TimeoutSeconds = 120, ContinueOnError = false, PipelineId = 2 },
+            new PipelineStep { Id = 6, Name = "Validate", Command = "terraform validate", Order = 1, TimeoutSeconds = 30, ContinueOnError = false, PipelineId = 3 },
+            new PipelineStep { Id = 7, Name = "Plan", Command = "terraform plan", Order = 2, TimeoutSeconds = 120, ContinueOnError = false, PipelineId = 3 },
+            new PipelineStep { Id = 8, Name = "Apply", Command = "terraform apply", Order = 3, TimeoutSeconds = 300, ContinueOnError = false, PipelineId = 3 }
         );
 
         modelBuilder.Entity<RunLog>().HasData(
-            new RunLog { Id = 1, PipelineId = 1, TriggeredByUserId = 2, StartedAt = new DateTime(2024, 5, 1, 10, 0, 0, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 5, 1, 10, 8, 0, DateTimeKind.Utc), Status = RunStatus.Success, TriggerType = TriggerType.Push },
-            new RunLog { Id = 2, PipelineId = 1, TriggeredByUserId = 1, StartedAt = new DateTime(2024, 5, 2, 9, 0, 0, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 5, 2, 9, 3, 0, DateTimeKind.Utc), Status = RunStatus.Failed, TriggerType = TriggerType.PullRequest },
-            new RunLog { Id = 3, PipelineId = 2, TriggeredByUserId = 3, StartedAt = new DateTime(2024, 5, 3, 14, 0, 0, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 5, 3, 14, 5, 0, DateTimeKind.Utc), Status = RunStatus.Success, TriggerType = TriggerType.Push },
-            new RunLog { Id = 4, PipelineId = 2, TriggeredByUserId = 2, StartedAt = new DateTime(2024, 5, 4, 9, 30, 0, DateTimeKind.Utc), FinishedAt = null, Status = RunStatus.Running, TriggerType = TriggerType.Manual },
-            new RunLog { Id = 5, PipelineId = 3, TriggeredByUserId = 1, StartedAt = new DateTime(2024, 4, 10, 8, 0, 0, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 4, 10, 8, 7, 0, DateTimeKind.Utc), Status = RunStatus.Success, TriggerType = TriggerType.Manual },
-            new RunLog { Id = 6, PipelineId = 3, TriggeredByUserId = 1, StartedAt = new DateTime(2024, 4, 15, 12, 0, 0, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 4, 15, 12, 2, 0, DateTimeKind.Utc), Status = RunStatus.Cancelled, TriggerType = TriggerType.Schedule }
+            new RunLog { Id = 1, PipelineId = 1, TriggeredByUserId = 2, StartedAt = new DateTime(2024, 5, 1, 10, 0, 0, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 5, 1, 10, 8, 0, DateTimeKind.Utc), Status = RunStatus.Success, TriggerType = TriggerType.Push, LogOutput = "Pipeline started." },
+            new RunLog { Id = 2, PipelineId = 1, TriggeredByUserId = 1, StartedAt = new DateTime(2024, 5, 2, 9, 0, 0, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 5, 2, 9, 3, 0, DateTimeKind.Utc), Status = RunStatus.Failed, TriggerType = TriggerType.PullRequest, LogOutput = "Pipeline started." },
+            new RunLog { Id = 3, PipelineId = 2, TriggeredByUserId = 3, StartedAt = new DateTime(2024, 5, 3, 14, 0, 0, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 5, 3, 14, 5, 0, DateTimeKind.Utc), Status = RunStatus.Success, TriggerType = TriggerType.Push, LogOutput = "Pipeline started." },
+            new RunLog { Id = 4, PipelineId = 2, TriggeredByUserId = 2, StartedAt = new DateTime(2024, 5, 4, 9, 30, 0, DateTimeKind.Utc), FinishedAt = null, Status = RunStatus.Running, TriggerType = TriggerType.Manual, LogOutput = "Pipeline started." },
+            new RunLog { Id = 5, PipelineId = 3, TriggeredByUserId = 1, StartedAt = new DateTime(2024, 4, 10, 8, 0, 0, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 4, 10, 8, 7, 0, DateTimeKind.Utc), Status = RunStatus.Success, TriggerType = TriggerType.Manual, LogOutput = "Pipeline started." },
+            new RunLog { Id = 6, PipelineId = 3, TriggeredByUserId = 1, StartedAt = new DateTime(2024, 4, 15, 12, 0, 0, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 4, 15, 12, 2, 0, DateTimeKind.Utc), Status = RunStatus.Cancelled, TriggerType = TriggerType.Schedule, LogOutput = "Pipeline started." }
+        );
+
+        modelBuilder.Entity<StepRun>().HasData(
+            // Run 1 - CI Pipeline success
+            new StepRun { Id = 1, StepId = 1, RunLogId = 1, ExecutionOrder = 1, StartedAt = new DateTime(2024, 5, 1, 10, 0, 1, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 5, 1, 10, 3, 0, DateTimeKind.Utc), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Build started...\nRestore completed.\nBuild succeeded." },
+            new StepRun { Id = 2, StepId = 2, RunLogId = 1, ExecutionOrder = 2, StartedAt = new DateTime(2024, 5, 1, 10, 3, 1, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 5, 1, 10, 7, 0, DateTimeKind.Utc), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Test run started...\n42 tests passed.\n0 failed." },
+            new StepRun { Id = 3, StepId = 3, RunLogId = 1, ExecutionOrder = 3, StartedAt = new DateTime(2024, 5, 1, 10, 7, 1, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 5, 1, 10, 8, 0, DateTimeKind.Utc), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Deploying...\nDeployment complete." },
+
+            // Run 2 - CI Pipeline failed at test
+            new StepRun { Id = 4, StepId = 1, RunLogId = 2, ExecutionOrder = 1, StartedAt = new DateTime(2024, 5, 2, 9, 0, 1, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 5, 2, 9, 2, 0, DateTimeKind.Utc), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Build started...\nBuild succeeded." },
+            new StepRun { Id = 5, StepId = 2, RunLogId = 2, ExecutionOrder = 2, StartedAt = new DateTime(2024, 5, 2, 9, 2, 1, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 5, 2, 9, 3, 0, DateTimeKind.Utc), Status = StepRunStatus.Failed, ExitCode = 1, ErrorMessage = "Test project failed: assertion in PaymentServiceTests.ShouldChargeAmount.", LogOutput = "Test run started...\n3 tests failed." },
+
+            // Run 3 - Frontend CI success
+            new StepRun { Id = 6, StepId = 4, RunLogId = 3, ExecutionOrder = 1, StartedAt = new DateTime(2024, 5, 3, 14, 0, 1, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 5, 3, 14, 2, 0, DateTimeKind.Utc), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Lint started...\nNo lint errors." },
+            new StepRun { Id = 7, StepId = 5, RunLogId = 3, ExecutionOrder = 2, StartedAt = new DateTime(2024, 5, 3, 14, 2, 1, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 5, 3, 14, 5, 0, DateTimeKind.Utc), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Build started...\nBundle created." },
+
+            // Run 4 - Frontend CI still running
+            new StepRun { Id = 8, StepId = 4, RunLogId = 4, ExecutionOrder = 1, StartedAt = new DateTime(2024, 5, 4, 9, 30, 1, DateTimeKind.Utc), FinishedAt = null, Status = StepRunStatus.Running, ExitCode = null, LogOutput = "Lint started..." },
+
+            // Run 5 - Terraform success
+            new StepRun { Id = 9, StepId = 6, RunLogId = 5, ExecutionOrder = 1, StartedAt = new DateTime(2024, 4, 10, 8, 0, 1, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 4, 10, 8, 1, 0, DateTimeKind.Utc), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Terraform validate passed." },
+            new StepRun { Id = 10, StepId = 7, RunLogId = 5, ExecutionOrder = 2, StartedAt = new DateTime(2024, 4, 10, 8, 1, 1, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 4, 10, 8, 4, 0, DateTimeKind.Utc), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Plan: 2 to add, 0 to change, 0 to destroy." },
+            new StepRun { Id = 11, StepId = 8, RunLogId = 5, ExecutionOrder = 3, StartedAt = new DateTime(2024, 4, 10, 8, 4, 1, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 4, 10, 8, 7, 0, DateTimeKind.Utc), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Apply complete. Resources created." },
+
+            // Run 6 - Terraform cancelled
+            new StepRun { Id = 12, StepId = 6, RunLogId = 6, ExecutionOrder = 1, StartedAt = new DateTime(2024, 4, 15, 12, 0, 1, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 4, 15, 12, 1, 0, DateTimeKind.Utc), Status = StepRunStatus.Success, ExitCode = 0, LogOutput = "Terraform validate passed." },
+            new StepRun { Id = 13, StepId = 7, RunLogId = 6, ExecutionOrder = 2, StartedAt = new DateTime(2024, 4, 15, 12, 1, 1, DateTimeKind.Utc), FinishedAt = new DateTime(2024, 4, 15, 12, 2, 0, DateTimeKind.Utc), Status = StepRunStatus.Cancelled, ExitCode = null, LogOutput = "Plan in progress...\nRun cancelled by user." }
         );
     }
 }
