@@ -25,3 +25,13 @@ Run the app itself:
 ```bash
 dotnet run
 ```
+
+## Demo with Docker Compose
+
+A `docker-compose.yml` is included to run the application together with a Postgres database.
+
+```bash
+docker compose up --build
+```
+
+The app will be available at <http://localhost:8080>. Migrations are applied automatically on startup, and the database data is persisted in a Docker volume.
