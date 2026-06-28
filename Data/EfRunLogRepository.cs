@@ -6,10 +6,12 @@ namespace CiCd.Data;
 public class EfRunLogRepository : IRunLogRepository
 {
     private readonly CiCdDbContext _context;
+    private readonly ILogger<EfRunLogRepository> _logger;
 
-    public EfRunLogRepository(CiCdDbContext context)
+    public EfRunLogRepository(CiCdDbContext context, ILogger<EfRunLogRepository> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public List<RunLog> GetAll()
@@ -51,24 +53,48 @@ public class EfRunLogRepository : IRunLogRepository
 
     public RunLog Add(RunLog runLog)
     {
-        _context.RunLogs.Add(runLog);
-        _context.SaveChanges();
-        return runLog;
+        try
+        {
+            _context.RunLogs.Add(runLog);
+            _context.SaveChanges();
+            return runLog;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to add runLog for pipeline {PipelineId}", runLog.PipelineId);
+            throw;
+        }
     }
 
     public void Update(RunLog runLog)
     {
-        _context.RunLogs.Update(runLog);
-        _context.SaveChanges();
+        try
+        {
+            _context.RunLogs.Update(runLog);
+            _context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update runLog id={Id}", runLog.Id);
+            throw;
+        }
     }
 
     public void Delete(int id)
     {
-        var runLog = _context.RunLogs.Find(id);
-        if (runLog != null)
+        try
         {
-            runLog.DeletedAt = DateTime.UtcNow;
-            _context.SaveChanges();
+            var runLog = _context.RunLogs.Find(id);
+            if (runLog != null)
+            {
+                runLog.DeletedAt = DateTime.UtcNow;
+                _context.SaveChanges();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete runLog id={Id}", id);
+            throw;
         }
     }
 

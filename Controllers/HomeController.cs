@@ -13,19 +13,23 @@ public class HomeController : Controller
     private readonly IProjectRepository _projectRepository;
     private readonly IPipelineRepository _pipelineRepository;
     private readonly IRunLogRepository _runLogRepository;
+    private readonly ILogger<HomeController> _logger;
 
     public HomeController(
         IProjectRepository projectRepository,
         IPipelineRepository pipelineRepository,
-        IRunLogRepository runLogRepository)
+        IRunLogRepository runLogRepository,
+        ILogger<HomeController> logger)
     {
         _projectRepository = projectRepository;
         _pipelineRepository = pipelineRepository;
         _runLogRepository = runLogRepository;
+        _logger = logger;
     }
 
     public IActionResult Index()
     {
+        _logger.LogDebug("Loading dashboard");
         var projects = _projectRepository.GetAll();
         var pipelines = _pipelineRepository.GetAll();
         var runLogs = _runLogRepository.GetAll();
@@ -59,6 +63,7 @@ public class HomeController : Controller
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
+        _logger.LogError("Error page requested, RequestId={RequestId}", Activity.Current?.Id ?? HttpContext.TraceIdentifier);
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

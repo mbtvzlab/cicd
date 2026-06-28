@@ -6,10 +6,12 @@ namespace CiCd.Data;
 public class EfUserRepository : IUserRepository
 {
     private readonly CiCdDbContext _context;
+    private readonly ILogger<EfUserRepository> _logger;
 
-    public EfUserRepository(CiCdDbContext context)
+    public EfUserRepository(CiCdDbContext context, ILogger<EfUserRepository> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public List<User> GetAll()
@@ -39,24 +41,48 @@ public class EfUserRepository : IUserRepository
 
     public User Add(User user)
     {
-        _context.Users.Add(user);
-        _context.SaveChanges();
-        return user;
+        try
+        {
+            _context.Users.Add(user);
+            _context.SaveChanges();
+            return user;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to add user '{Username}'", user.Username);
+            throw;
+        }
     }
 
     public void Update(User user)
     {
-        _context.Users.Update(user);
-        _context.SaveChanges();
+        try
+        {
+            _context.Users.Update(user);
+            _context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update user id={Id}", user.Id);
+            throw;
+        }
     }
 
     public void Delete(int id)
     {
-        var user = _context.Users.Find(id);
-        if (user != null)
+        try
         {
-            user.DeletedAt = DateTime.UtcNow;
-            _context.SaveChanges();
+            var user = _context.Users.Find(id);
+            if (user != null)
+            {
+                user.DeletedAt = DateTime.UtcNow;
+                _context.SaveChanges();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete user id={Id}", id);
+            throw;
         }
     }
 

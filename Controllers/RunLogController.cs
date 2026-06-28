@@ -10,10 +10,12 @@ namespace CiCd.Controllers;
 public class RunLogController : Controller
 {
     private readonly IRunLogRepository _runLogRepository;
+    private readonly ILogger<RunLogController> _logger;
 
-    public RunLogController(IRunLogRepository runLogRepository)
+    public RunLogController(IRunLogRepository runLogRepository, ILogger<RunLogController> logger)
     {
         _runLogRepository = runLogRepository;
+        _logger = logger;
     }
 
     [HttpGet("")]
@@ -46,6 +48,7 @@ public class RunLogController : Controller
     [Authorize(Roles = "Admin")]
     public IActionResult Delete(int id)
     {
+        _logger.LogWarning("RunLog id={Id} deleted by {Username}", id, User.Identity?.Name);
         _runLogRepository.Delete(id);
         return RedirectToAction(nameof(Index));
     }
@@ -66,6 +69,7 @@ public class RunLogController : Controller
             TriggerType = TriggerType.Manual
         };
         _runLogRepository.Add(newRun);
+        _logger.LogInformation("Pipeline id={PipelineId} retriggered by {Username}, new run id={NewRunId}", runLog.PipelineId, User.Identity?.Name, newRun.Id);
         return RedirectToAction(nameof(Details), new { id = newRun.Id });
     }
 }

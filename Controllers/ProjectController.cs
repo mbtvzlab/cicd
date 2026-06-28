@@ -11,11 +11,13 @@ public class ProjectController : Controller
 {
     private readonly IProjectRepository _projectRepository;
     private readonly IUserRepository _userRepository;
+    private readonly ILogger<ProjectController> _logger;
 
-    public ProjectController(IProjectRepository projectRepository, IUserRepository userRepository)
+    public ProjectController(IProjectRepository projectRepository, IUserRepository userRepository, ILogger<ProjectController> logger)
     {
         _projectRepository = projectRepository;
         _userRepository = userRepository;
+        _logger = logger;
     }
 
     public IActionResult Index(string? search)
@@ -66,6 +68,7 @@ public class ProjectController : Controller
             CreatedAt = DateTime.UtcNow
         };
         _projectRepository.Add(project);
+        _logger.LogInformation("Project '{Name}' (id={Id}) created", project.Name, project.Id);
         return RedirectToAction(nameof(Index));
     }
 
@@ -105,6 +108,7 @@ public class ProjectController : Controller
         project.IsActive = model.IsActive;
         project.OwnerId = model.OwnerId;
         _projectRepository.Update(project);
+        _logger.LogInformation("Project '{Name}' (id={Id}) updated", project.Name, project.Id);
         return RedirectToAction(nameof(Index));
     }
 
@@ -113,6 +117,7 @@ public class ProjectController : Controller
     [Authorize(Roles = "Admin")]
     public IActionResult Delete(int id)
     {
+        _logger.LogWarning("Project id={Id} deleted by {Username}", id, User.Identity?.Name);
         _projectRepository.Delete(id);
         return RedirectToAction(nameof(Index));
     }

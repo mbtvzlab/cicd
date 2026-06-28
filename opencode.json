@@ -3,7 +3,7 @@
   "agent": {
     "build": {
       "mode": "primary",
-      "model": "nano-gpt/zai-org/glm-5.1",
+      "model": "nano-gpt/moonshotai/kimi-k2.7-code",
       "tools": {
         "write": true,
         "edit": true,
@@ -12,7 +12,7 @@
     },
     "plan": {
       "mode": "primary",
-      "model": "nano-gpt/zai-org/glm-5.1",
+      "model": "nano-gpt/moonshotai/kimi-k2.7-code",
       "tools": {
         "write": false,
         "edit": false,

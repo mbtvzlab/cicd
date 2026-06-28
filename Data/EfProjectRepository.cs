@@ -6,10 +6,12 @@ namespace CiCd.Data;
 public class EfProjectRepository : IProjectRepository
 {
     private readonly CiCdDbContext _context;
+    private readonly ILogger<EfProjectRepository> _logger;
 
-    public EfProjectRepository(CiCdDbContext context)
+    public EfProjectRepository(CiCdDbContext context, ILogger<EfProjectRepository> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public List<Project> GetAll()
@@ -49,24 +51,48 @@ public class EfProjectRepository : IProjectRepository
 
     public Project Add(Project project)
     {
-        _context.Projects.Add(project);
-        _context.SaveChanges();
-        return project;
+        try
+        {
+            _context.Projects.Add(project);
+            _context.SaveChanges();
+            return project;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to add project '{Name}'", project.Name);
+            throw;
+        }
     }
 
     public void Update(Project project)
     {
-        _context.Projects.Update(project);
-        _context.SaveChanges();
+        try
+        {
+            _context.Projects.Update(project);
+            _context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update project id={Id}", project.Id);
+            throw;
+        }
     }
 
     public void Delete(int id)
     {
-        var project = _context.Projects.Find(id);
-        if (project != null)
+        try
         {
-            project.DeletedAt = DateTime.UtcNow;
-            _context.SaveChanges();
+            var project = _context.Projects.Find(id);
+            if (project != null)
+            {
+                project.DeletedAt = DateTime.UtcNow;
+                _context.SaveChanges();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete project id={Id}", id);
+            throw;
         }
     }
 

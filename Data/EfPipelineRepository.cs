@@ -6,10 +6,12 @@ namespace CiCd.Data;
 public class EfPipelineRepository : IPipelineRepository
 {
     private readonly CiCdDbContext _context;
+    private readonly ILogger<EfPipelineRepository> _logger;
 
-    public EfPipelineRepository(CiCdDbContext context)
+    public EfPipelineRepository(CiCdDbContext context, ILogger<EfPipelineRepository> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public List<Pipeline> GetAll()
@@ -52,24 +54,48 @@ public class EfPipelineRepository : IPipelineRepository
 
     public Pipeline Add(Pipeline pipeline)
     {
-        _context.Pipelines.Add(pipeline);
-        _context.SaveChanges();
-        return pipeline;
+        try
+        {
+            _context.Pipelines.Add(pipeline);
+            _context.SaveChanges();
+            return pipeline;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to add pipeline '{Name}' for project {ProjectId}", pipeline.Name, pipeline.ProjectId);
+            throw;
+        }
     }
 
     public void Update(Pipeline pipeline)
     {
-        _context.Pipelines.Update(pipeline);
-        _context.SaveChanges();
+        try
+        {
+            _context.Pipelines.Update(pipeline);
+            _context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update pipeline id={Id}", pipeline.Id);
+            throw;
+        }
     }
 
     public void Delete(int id)
     {
-        var pipeline = _context.Pipelines.Find(id);
-        if (pipeline != null)
+        try
         {
-            pipeline.DeletedAt = DateTime.UtcNow;
-            _context.SaveChanges();
+            var pipeline = _context.Pipelines.Find(id);
+            if (pipeline != null)
+            {
+                pipeline.DeletedAt = DateTime.UtcNow;
+                _context.SaveChanges();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete pipeline id={Id}", id);
+            throw;
         }
     }
 

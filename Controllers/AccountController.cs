@@ -12,10 +12,12 @@ namespace CiCd.Controllers;
 public class AccountController : Controller
 {
     private readonly IUserRepository _userRepository;
+    private readonly ILogger<AccountController> _logger;
 
-    public AccountController(IUserRepository userRepository)
+    public AccountController(IUserRepository userRepository, ILogger<AccountController> logger)
     {
         _userRepository = userRepository;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -39,9 +41,12 @@ public class AccountController : Controller
         var user = _userRepository.GetByUsername(model.Username);
         if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
         {
+            _logger.LogWarning("Failed login attempt for username={Username}", model.Username);
             ModelState.AddModelError(string.Empty, "Invalid username or password.");
             return View(model);
         }
+
+        _logger.LogInformation("User {Username} logged in", user.Username);
 
         var claims = new List<Claim>
         {
@@ -76,7 +81,9 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
+        var username = User.Identity?.Name;
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        _logger.LogInformation("User {Username} logged out", username);
         return RedirectToAction("Login", "Account");
     }
 

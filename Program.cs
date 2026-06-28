@@ -1,4 +1,5 @@
 using CiCd.Data;
+using CiCd.Middleware;
 using CiCd.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Localization;
@@ -6,6 +7,12 @@ using System.Globalization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole(options =>
+{
+    options.LogToStandardErrorThreshold = LogLevel.Trace;
+});
 
 builder.Services.AddControllersWithViews();
 
@@ -67,6 +74,7 @@ app.UseRequestLocalization(new RequestLocalizationOptions
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapStaticAssets();

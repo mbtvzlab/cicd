@@ -14,10 +14,12 @@ namespace CiCd.Controllers;
 public class SettingsController : Controller
 {
     private readonly IUserRepository _userRepository;
+    private readonly ILogger<SettingsController> _logger;
 
-    public SettingsController(IUserRepository userRepository)
+    public SettingsController(IUserRepository userRepository, ILogger<SettingsController> logger)
     {
         _userRepository = userRepository;
+        _logger = logger;
     }
 
     [HttpGet("")]
@@ -90,6 +92,8 @@ public class SettingsController : Controller
         user.DisplayName = model.DisplayName;
         user.Email = model.Email;
         _userRepository.Update(user);
+
+        _logger.LogInformation("Settings updated for user '{Username}' (id={Id})", user.Username, user.Id);
 
         await RefreshAuthCookieAsync(user);
 

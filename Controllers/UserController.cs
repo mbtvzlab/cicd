@@ -10,10 +10,12 @@ namespace CiCd.Controllers;
 public class UserController : Controller
 {
     private readonly IUserRepository _userRepository;
+    private readonly ILogger<UserController> _logger;
 
-    public UserController(IUserRepository userRepository)
+    public UserController(IUserRepository userRepository, ILogger<UserController> logger)
     {
         _userRepository = userRepository;
+        _logger = logger;
     }
 
     [HttpGet("")]
@@ -47,6 +49,7 @@ public class UserController : Controller
             ? BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString())
             : BCrypt.Net.BCrypt.HashPassword(user.Password);
         _userRepository.Add(user);
+        _logger.LogInformation("User '{Username}' (id={Id}) created", user.Username, user.Id);
         return RedirectToAction(nameof(Index));
     }
 
@@ -74,6 +77,7 @@ public class UserController : Controller
             existing.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
         }
         _userRepository.Update(existing);
+        _logger.LogInformation("User '{Username}' (id={Id}) updated", existing.Username, existing.Id);
         return RedirectToAction(nameof(Index));
     }
 
@@ -81,6 +85,7 @@ public class UserController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Delete(int id)
     {
+        _logger.LogWarning("User id={Id} deleted by {Username}", id, User.Identity?.Name);
         _userRepository.Delete(id);
         return RedirectToAction(nameof(Index));
     }

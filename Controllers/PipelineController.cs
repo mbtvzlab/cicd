@@ -12,11 +12,13 @@ public class PipelineController : Controller
 {
     private readonly IPipelineRepository _pipelineRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly ILogger<PipelineController> _logger;
 
-    public PipelineController(IPipelineRepository pipelineRepository, IProjectRepository projectRepository)
+    public PipelineController(IPipelineRepository pipelineRepository, IProjectRepository projectRepository, ILogger<PipelineController> logger)
     {
         _pipelineRepository = pipelineRepository;
         _projectRepository = projectRepository;
+        _logger = logger;
     }
 
     [HttpGet("")]
@@ -78,6 +80,7 @@ public class PipelineController : Controller
             CreatedAt = DateTime.UtcNow
         };
         _pipelineRepository.Add(pipeline);
+        _logger.LogInformation("Pipeline '{Name}' (id={Id}) created for project {ProjectId}", pipeline.Name, pipeline.Id, pipeline.ProjectId);
         return RedirectToAction(nameof(Index));
     }
 
@@ -118,6 +121,7 @@ public class PipelineController : Controller
         pipeline.IsEnabled = model.IsEnabled;
         pipeline.ProjectId = model.ProjectId;
         _pipelineRepository.Update(pipeline);
+        _logger.LogInformation("Pipeline '{Name}' (id={Id}) updated", pipeline.Name, pipeline.Id);
         return RedirectToAction(nameof(Index));
     }
 
@@ -126,6 +130,7 @@ public class PipelineController : Controller
     [Authorize(Roles = "Admin")]
     public IActionResult Delete(int id)
     {
+        _logger.LogWarning("Pipeline id={Id} deleted by {Username}", id, User.Identity?.Name);
         _pipelineRepository.Delete(id);
         return RedirectToAction(nameof(Index));
     }
