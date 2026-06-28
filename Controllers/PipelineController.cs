@@ -43,6 +43,14 @@ public class PipelineController : Controller
         return View(pipeline);
     }
 
+    [HttpGet("{id:int}/steps")]
+    public IActionResult Steps(int id)
+    {
+        var pipeline = _pipelineRepository.GetById(id);
+        if (pipeline == null) return NotFound();
+        return View(pipeline);
+    }
+
     [HttpGet("create")]
     public IActionResult Create()
     {

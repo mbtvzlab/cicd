@@ -66,7 +66,7 @@
 
     <div class="card">
         <div class="card-body">
-            <h3>Steps (@Model.Steps?.Count)</h3>
+                    <h3>Steps (@Model.Steps?.Count) <a href="@Url.Action("Steps", new { id = Model.Id })" class="btn btn-secondary btn-sm" style="margin-left: 8px;">View All</a></h3>
             @if (Model.Steps?.Any() == true)
             {
                 <table style="margin-top: 12px;">
@@ -82,7 +82,7 @@
                         @foreach (var step in Model.Steps.OrderBy(s => s.Order))
                         {
                             <tr>
-                                <td class="text-secondary">@step.Order</td>
+                                <td class="text-secondary"><a id="step-@step.Order" href="@Url.Action("Steps", new { id = Model.Id })#step-@step.Order">@step.Order</a></td>
                                 <td>@step.Name</td>
                                 <td class="text-secondary" style="font-family: monospace;">@step.Command</td>
                                 <td>@step.TimeoutSeconds s</td>

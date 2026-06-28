@@ -57,6 +57,7 @@
                     <td>@pipeline.Steps?.Count</td>
                     <td class="text-secondary">@pipeline.CreatedAt.ToString("yyyy-MM-dd")</td>
                     <td class="actions-cell">
+                        <a href="@Url.Action("Steps", new { id = pipeline.Id })" class="btn btn-secondary btn-sm">Steps</a>
                         <a href="@Url.Action("Edit", new { id = pipeline.Id })" class="btn btn-secondary btn-sm">Edit</a>
                         <form asp-action="Delete" asp-route-id="@pipeline.Id" method="post" class="delete-form">
                             @Html.AntiForgeryToken()
@@ -106,6 +107,7 @@ $(function(){
                                 '<td>' + p.steps + '</td>' +
                                 '<td class="text-secondary">' + p.createdAt + '</td>' +
                                 '<td class="actions-cell">' +
+                                    '<a href="/pipelines/' + p.id + '/steps" class="btn btn-secondary btn-sm">Steps</a> ' +
                                     '<a href="/pipelines/' + p.id + '/edit" class="btn btn-secondary btn-sm">Edit</a> ' +
                                     '<form action="/pipelines/' + p.id + '/delete" method="post" class="delete-form">' +
                                     '<button type="submit" class="btn btn-danger btn-sm" data-confirm="Are you sure?">Delete</button></form>' +

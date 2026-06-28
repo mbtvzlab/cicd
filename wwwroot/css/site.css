@@ -21,6 +21,15 @@ body {
   margin-bottom: 60px;
 }
 
+.step-card {
+  scroll-margin-top: 80px;
+}
+
+.step-card:target {
+  background-color: rgba(37, 140, 251, 0.12);
+  box-shadow: inset 4px 0 0 #258cfb;
+}
+
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;

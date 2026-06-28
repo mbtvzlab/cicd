@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CiCd.Data;
 using CiCd.Models;
-using CiCd.ViewModels;
 
 namespace CiCd.Controllers;
 
@@ -11,14 +10,10 @@ namespace CiCd.Controllers;
 public class RunLogController : Controller
 {
     private readonly IRunLogRepository _runLogRepository;
-    private readonly IPipelineRepository _pipelineRepository;
-    private readonly IUserRepository _userRepository;
 
-    public RunLogController(IRunLogRepository runLogRepository, IPipelineRepository pipelineRepository, IUserRepository userRepository)
+    public RunLogController(IRunLogRepository runLogRepository)
     {
         _runLogRepository = runLogRepository;
-        _pipelineRepository = pipelineRepository;
-        _userRepository = userRepository;
     }
 
     [HttpGet("")]
@@ -44,50 +39,6 @@ public class RunLogController : Controller
         var runLog = _runLogRepository.GetById(id);
         if (runLog == null) return NotFound();
         return View(runLog);
-    }
-
-    [HttpGet("{id:int}/edit")]
-    public IActionResult Edit(int id)
-    {
-        var runLog = _runLogRepository.GetById(id);
-        if (runLog == null) return NotFound();
-        ViewBag.Pipelines = _pipelineRepository.GetAll();
-        ViewBag.Users = _userRepository.GetAll();
-        var model = new RunLogEditModel
-        {
-            Id = runLog.Id,
-            Status = runLog.Status,
-            PipelineId = runLog.PipelineId,
-            TriggeredByUserId = runLog.TriggeredByUserId,
-            StartedAt = runLog.StartedAt,
-            FinishedAt = runLog.FinishedAt,
-            TriggerType = runLog.TriggerType
-        };
-        return View(model);
-    }
-
-    [HttpPost("{id:int}/edit")]
-    [ValidateAntiForgeryToken]
-    [Authorize(Roles = "Admin,Developer")]
-    public IActionResult Edit(int id, RunLogEditModel model)
-    {
-        if (id != model.Id) return BadRequest();
-        if (!ModelState.IsValid)
-        {
-            ViewBag.Pipelines = _pipelineRepository.GetAll();
-            ViewBag.Users = _userRepository.GetAll();
-            return View(model);
-        }
-        var runLog = _runLogRepository.GetById(id);
-        if (runLog == null) return NotFound();
-        runLog.Status = model.Status;
-        runLog.PipelineId = model.PipelineId;
-        runLog.TriggeredByUserId = model.TriggeredByUserId;
-        runLog.StartedAt = model.StartedAt;
-        runLog.FinishedAt = model.FinishedAt;
-        runLog.TriggerType = model.TriggerType;
-        _runLogRepository.Update(runLog);
-        return RedirectToAction(nameof(Details), new { id });
     }
 
     [HttpPost("{id:int}/delete")]
